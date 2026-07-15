@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operazione Blackout Ibrido — CTF Multi-Dominio</title>
+<meta name="description" content="Esercitazione CTF didattica: Cyber-Social Security in Multi-Domain Operations. Scenario fittizio ispirato all'attacco alla rete elettrica ucraina del 2015.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1317;
+  --bg-panel:#161d23;
+  --bg-panel-2:#1c242b;
+  --line:#2c363e;
+  --paper:#e9e1cd;
+  --paper-2:#dbd0b3;
+  --ink:#1c1a13;
+  --ink-soft:#4a4536;
+  --amber:#c8933f;
+  --amber-bright:#e3ab54;
+  --teal:#4f9d94;
+  --red:#b8453a;
+  --text:#e7e2d6;
+  --text-dim:#8f9a9e;
+  --text-dimmer:#5f6a6e;
+  --mono:'IBM Plex Mono', monospace;
+  --cond:'Barlow Condensed', sans-serif;
+  --serif:'Source Serif 4', serif;
+  --type:'Courier Prime', monospace;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--serif);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  background-image:radial-gradient(circle at 1px 1px, rgba(255,255,255,0.025) 1px, transparent 0);
+  background-size:26px 26px;
+  pointer-events:none;
+  z-index:1;
+}
+a{color:var(--amber-bright);}
+.wrap{max-width:980px;margin:0 auto;padding:0 24px;}
+h1,h2,h3{font-family:var(--cond);text-transform:uppercase;letter-spacing:0.02em;margin:0;}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--teal);
+}
+::selection{background:var(--amber);color:#1c1a13;}
+:focus-visible{outline:2px solid var(--amber-bright);outline-offset:3px;}
+
+/* ---------- TOP BAR ---------- */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(14,19,23,0.92);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 24px;max-width:980px;margin:0 auto;
+}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:0.08em;color:var(--text-dim);}
+.brand svg{flex-shrink:0;}
+.progress-chip{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:12px;letter-spacing:0.05em;color:var(--text-dim);
+}
+.completion-badge{
+  font-family:var(--mono);font-size:12px;letter-spacing:0.04em;color:var(--teal);
+  border:1px solid var(--teal);background:rgba(79,157,148,0.08);
+  padding:5px 10px;border-radius:2px;
+}
+.progress-dots{display:flex;gap:5px;}
+.progress-dots span{width:9px;height:9px;border-radius:1px;background:var(--line);transition:background .3s;}
+.progress-dots span.on{background:var(--teal);box-shadow:0 0 8px rgba(79,157,148,.6);}
+.facilitator-toggle{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:11px;letter-spacing:0.05em;color:var(--text-dimmer);
+  cursor:pointer;user-select:none;
+  background:none;border:1px solid var(--line);border-radius:2px;
+  padding:6px 10px;
+  transition:color .15s, border-color .15s;
+}
+.facilitator-toggle:hover{color:var(--text-dim);border-color:var(--text-dimmer);}
+.facilitator-toggle.active{color:var(--amber-bright);border-color:var(--amber);}
+
+.team-footer-inner {
+  width: min(1480px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+}
+
+.footer-banner {
+  display: block;
+  width: 100%;
+  max-height: 132px;
+  object-fit: contain;
+  background: #fff;
+}
+
+/* ---------- HERO ---------- */
+.hero{
+  position:relative;z-index:2;
+  padding:64px 0 40px;
+  border-bottom:1px solid var(--line);
+  overflow:hidden;
+}
+.alert-bar{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--red);
+  border:1px solid rgba(184,69,58,0.4);
+  background:rgba(184,69,58,0.08);
+  padding:5px 12px;border-radius:2px;
+  margin-bottom:22px;
+}
+.alert-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.6s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+.hero h1{
+  font-size:clamp(40px,7vw,72px);
+  font-weight:800;
+  line-height:0.98;
+  color:var(--paper);
+  margin-bottom:18px;
+}
+.hero-sub{
+  font-family:var(--cond);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;
+  color:var(--text-dim);font-size:15px;margin-bottom:28px;
+}
+.briefing-quote{
+  border-left:3px solid var(--amber);
+  padding:4px 0 4px 20px;
+  font-size:16.5px;
+  color:var(--text);
+  max-width:74ch;
+}
+.briefing-quote p{margin:0 0 12px;}
+.briefing-quote p:last-child{margin-bottom:0;}
+.briefing-quote strong{color:var(--paper);font-weight:600;}
+
+.dash{
+  margin-top:38px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+}
+.dash-cell{
+  background:var(--bg-panel);
+  padding:16px 18px;
+}
+.dash-num{
+  font-family:var(--mono);font-weight:600;font-size:26px;color:var(--amber-bright);
+  line-height:1;
+}
+.dash-num.timer{color:var(--red);font-variant-numeric:tabular-nums;}
+.dash-num.timer.expired{color:var(--text-dimmer);}
+.dash-num.timer.solved{color:var(--teal);}
+.dash-label{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);
+  margin-top:6px;
+}
+@media (max-width:680px){.dash{grid-template-columns:repeat(2,1fr);}}
+
+/* ---------- SECTION SHELL ---------- */
+section{position:relative;z-index:2;padding:56px 0;}
+.section-head{margin-bottom:28px;}
+.section-head .eyebrow{margin-bottom:8px;display:block;}
+.section-head h2{font-size:clamp(26px,4vw,36px);color:var(--paper);font-weight:700;}
+.divider{border:none;border-top:1px solid var(--line);margin:0;}
+
+/* ---------- OBJECTIVES ---------- */
+.obj-toggle{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--bg-panel);border:1px solid var(--line);
+  color:var(--amber-bright);font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  padding:9px 16px;border-radius:2px;cursor:pointer;
+  transition:background .15s;
+}
+.obj-toggle:hover{background:var(--bg-panel-2);}
+.obj-toggle .arrow{transition:transform .25s ease;font-size:11px;}
+.obj-toggle.open .arrow{transform:rotate(180deg);}
+.obj-panel{max-height:0;overflow:hidden;transition:max-height .35s ease;}
+.obj-panel.open{max-height:900px;}
+.obj-list{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:0;border-top:1px solid var(--line);}
+.obj-list li{
+  display:grid;grid-template-columns:44px 1fr;gap:16px;
+  padding:16px 0;border-bottom:1px solid var(--line);
+  font-size:15.5px;color:var(--text);
+}
+.obj-list .n{font-family:var(--mono);color:var(--text-dimmer);font-size:13px;padding-top:2px;}
+.obj-list em{color:var(--amber-bright);font-style:normal;}
+
+/* ---------- CASE FILES ---------- */
+.filestack{display:flex;flex-direction:column;gap:22px;}
+.dossier{
+  background:var(--bg-panel);
+  border:1px solid var(--line);
+  position:relative;
+}
+.dossier-tab{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:14px;
+  padding:16px 20px;
+  cursor:pointer;
+  user-select:none;
+}
+.dossier-tab-left{display:flex;align-items:center;gap:14px;min-width:0;}
+.codename{
+  font-family:var(--cond);font-weight:800;font-size:22px;letter-spacing:0.03em;
+  color:var(--paper);white-space:nowrap;
+}
+.domain-badge{
+  font-family:var(--mono);font-size:10px;letter-spacing:0.09em;text-transform:uppercase;
+  padding:3px 9px;border-radius:2px;white-space:nowrap;
+  border:1px solid currentColor;
+}
+.badge-cyber{color:var(--teal);}
+.badge-informativo{color:#b491c9;}
+.badge-fisico{color:var(--amber-bright);}
+.badge-cyberfisico{color:#7fb3d5;}
+.badge-cognitivo{color:var(--red);}
+.dossier-title{color:var(--text-dim);font-size:13.5px;font-family:var(--cond);text-transform:none;letter-spacing:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.chevron{
+  flex-shrink:0;
+  color:var(--text-dimmer);
+  transition:transform .25s ease;
+  font-family:var(--mono);font-size:13px;
+}
+.dossier.open .chevron{transform:rotate(90deg);color:var(--amber-bright);}
+.dossier-status{
+  flex-shrink:0;
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  color:var(--text-dimmer);
+  border:1px solid var(--line);
+  padding:3px 8px;border-radius:2px;
+}
+.dossier-status.solved{color:#1c1a13;background:var(--teal);border-color:var(--teal);}
+.dossier-time{
+  flex-shrink:0;
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  color:var(--text-dimmer);
+}
+.dossier-time.solved{color:var(--teal);}
+
+.dossier-body{
+  max-height:0;overflow:hidden;
+  transition:max-height .35s ease;
+}
+.dossier.open .dossier-body{max-height:3400px;}
+.dossier-body-inner{padding:0 20px 26px;}
+
+.log{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--type);
+  font-size:12.6px;
+  line-height:1.68;
+  padding:18px 20px;
+  border:1px solid var(--paper-2);
+  white-space:pre-wrap;
+  overflow-x:auto;
+  position:relative;
+}
+.log::before{
+  content:attr(data-stamp);
+  position:absolute;top:12px;right:16px;
+  font-family:var(--mono);font-weight:600;font-size:10px;letter-spacing:.12em;
+  color:var(--red);
+  border:2px solid var(--red);
+  padding:2px 7px;border-radius:2px;
+  transform:rotate(6deg);
+  opacity:0.55;
+}
+.narrative-block{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--serif);font-size:14.5px;
+  padding:18px 20px;border:1px solid var(--paper-2);
+}
+.narrative-block p{margin:0 0 10px;}
+.narrative-block p:last-child{margin:0;}
+.narrative-block .src{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-bottom:10px;}
+
+.questions{margin-top:18px;}
+.questions h4{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-dim);margin:0 0 10px;
+}
+.questions h4::after{
+  content:" · risposte riservate al facilitatore";
+  text-transform:none;letter-spacing:normal;color:var(--text-dimmer);
+}
+body.facilitator .questions h4::after{
+  content:" · risposte visibili (modalità facilitatore)";
+  color:var(--amber-bright);
+}
+.qitem{
+  border-bottom:1px dashed var(--line);
+  padding:9px 0;
+}
+.qitem:last-child{border-bottom:none;}
+.qbtn{
+  display:flex;width:100%;justify-content:space-between;align-items:center;gap:12px;
+  background:none;border:none;color:var(--text);font-family:var(--serif);font-size:14px;
+  text-align:left;cursor:pointer;padding:0;
+}
+.qbtn .plus{font-family:var(--mono);color:var(--amber-bright);flex-shrink:0;}
+.qanswer{
+  max-height:0;overflow:hidden;transition:max-height .25s ease;
+  font-family:var(--mono);font-size:12.5px;color:var(--teal);
+}
+.qanswer.show{max-height:200px;margin-top:8px;}
+
+/* Le risposte alle domande guida sono visibili solo in modalità facilitatore */
+body:not(.facilitator) .qanswer{max-height:0 !important;margin-top:0 !important;}
+body:not(.facilitator) .qbtn{cursor:default;}
+body:not(.facilitator) .qbtn .plus{color:var(--text-dimmer);}
+
+.flagbox{
+  margin-top:20px;
+  border:1px solid var(--line);
+  background:var(--bg-panel-2);
+  padding:16px 18px;
+}
+.flagbox h4{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--amber-bright);margin:0 0 10px;
+}
+.hint-toggle{
+  display:inline-flex;align-items:center;gap:6px;
+  background:none;border:none;color:var(--text-dimmer);
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;
+  cursor:pointer;padding:0;margin-top:10px;
+}
+.hint-toggle:hover{color:var(--text-dim);}
+.hint-body{
+  max-height:0;overflow:hidden;transition:max-height .25s ease;
+  font-family:var(--mono);font-size:12.5px;color:var(--amber-bright);
+}
+.hint-body.show{max-height:100px;margin-top:8px;}
+.flag-row{display:flex;gap:10px;flex-wrap:wrap;}
+.flag-row input{
+  flex:1 1 240px;
+  background:var(--bg);
+  border:1px solid var(--line);
+  color:var(--text);
+  font-family:var(--mono);font-size:13px;
+  padding:10px 12px;
+  border-radius:2px;
+}
+.flag-row input:disabled{color:var(--teal);border-color:var(--teal);background:rgba(79,157,148,0.08);}
+.flag-row button{
+  font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--amber);color:#1c1a13;border:none;
+  padding:0 20px;border-radius:2px;cursor:pointer;
+  transition:background .15s;
+}
+.flag-row button:hover{background:var(--amber-bright);}
+.flag-row button:disabled{background:var(--teal);cursor:default;}
+.flag-feedback{
+  margin-top:9px;font-family:var(--mono);font-size:12px;min-height:16px;
+}
+.flag-feedback.ok{color:var(--teal);}
+.flag-feedback.err{color:var(--red);}
+
+/* ---------- FACILITATOR NOTE ---------- */
+.facilitator-note{
+  display:none;
+  margin-bottom:34px;
+  border:1px solid rgba(200,147,63,0.4);
+  background:rgba(200,147,63,0.07);
+  padding:16px 20px;
+  font-size:14px;
+}
+body.facilitator .facilitator-note{display:block;}
+.facilitator-note .eyebrow{color:var(--amber-bright);margin-bottom:6px;}
+
+/* ---------- ATTACK MAP ---------- */
+.map-table-wrap{overflow-x:auto;border:1px solid var(--line);}
+table.map{border-collapse:collapse;width:100%;min-width:760px;font-size:13.5px;}
+table.map th, table.map td{
+  border-bottom:1px solid var(--line);
+  padding:12px 14px;text-align:left;vertical-align:top;
+}
+table.map th{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-dim);background:var(--bg-panel);
+}
+table.map td{color:var(--text);}
+table.map td.domain{font-family:var(--cond);font-weight:700;text-transform:uppercase;color:var(--amber-bright);}
+.map-locked{
+  padding:40px 20px;text-align:center;
+  border:1px dashed var(--line);
+  color:var(--text-dimmer);
+  font-family:var(--mono);font-size:13px;
+}
+
+/* ---------- DEBRIEF ---------- */
+.debrief-locked{
+  border:1px dashed var(--line);
+  padding:50px 24px;text-align:center;
+}
+.debrief-locked .lockicon{font-size:26px;margin-bottom:10px;color:var(--text-dimmer);}
+.debrief-locked p{font-family:var(--mono);font-size:13px;color:var(--text-dimmer);margin:0;}
+.debrief-content{display:none;}
+.debrief-content.unlocked{display:block;animation:fadein .5s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.debrief-content h3{font-size:19px;color:var(--paper);margin:26px 0 10px;font-weight:700;}
+.debrief-content p{font-size:15px;color:var(--text);max-width:76ch;}
+.debrief-content .callout{
+  border-left:3px solid var(--teal);padding-left:18px;margin:22px 0;
+  font-style:italic;color:var(--text-dim);font-size:14.5px;
+}
+.pedagogical{
+  margin-top:24px;background:var(--bg-panel);border:1px solid var(--line);
+  padding:18px 20px;
+}
+.pedagogical h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-bright);margin:0 0 8px;}
+
+/* ---------- FOOTER ---------- */
+footer{
+  border-top:1px solid var(--line);
+  padding:32px 0 60px;
+  font-family:var(--mono);font-size:11.5px;color:var(--text-dimmer);
+}
+footer a{color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 11-14h-7l0-6z" stroke="#c8933f" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      MODULO 1 · KHOLMGRAD-FUSION
+    </div>
+    <div style="display:flex;align-items:center;gap:20px;">
+      <div class="progress-chip">
+        <span id="progress-text">0/5 FLAG</span>
+        <span class="progress-dots" id="progress-dots">
+          <span data-d="alfa"></span><span data-d="bravo"></span><span data-d="charlie"></span><span data-d="delta"></span><span data-d="echo"></span>
+        </span>
+      </div>
+      <span class="completion-badge" id="completion-badge" style="display:none;">✅ Completata in <span id="completion-time-value"></span></span>
+      <button class="facilitator-toggle" id="facilitator-btn" type="button">
+        <span id="facilitator-icon">🔒</span> MODALITÀ FACILITATORE
+      </button>
+      <button class="facilitator-toggle" id="reset-btn" type="button" title="Riporta l'esercitazione allo stato iniziale">
+        ↺ RESET
+      </button>
+    </div>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="alert-bar"><span class="alert-dot"></span> BLACKOUT IN CORSO — KHOLMGRAD, SETTORE NORD</div>
+    <h1>Operazione<br>Blackout Ibrido</h1>
+    <div class="hero-sub">CTF · Cyber-Social Security in Multi-Domain Operations</div>
+    <div class="briefing-quote">
+      <p>Sei analista presso il <strong>Centro di Fusione Intelligence</strong> della Repubblica di <strong>Kholmgrad</strong>. Alle <strong>15:35 locali del 14 novembre</strong>, tre società di distribuzione elettrica regionali — <strong>Nordenergo, Karpat-Elektro, Rivenska Merezha</strong> — segnalano interruzioni simultanee.</p>
+      <p>Il centralino guasti è irraggiungibile, sui social circolano voci contrastanti, e gli analisti HUMINT segnalano movimenti anomali presso due sottostazioni. Ricostruisci la catena d'attacco e produci la mappa multi-dominio da presentare al Comitato di crisi.</p>
+    </div>
+
+    <div class="dash">
+      <div class="dash-cell">
+        <div class="dash-num">220.000</div>
+        <div class="dash-label">Utenze senza corrente</div>
+      </div>
+      <div class="dash-cell">
+        <div class="dash-num">3</div>
+        <div class="dash-label">Società colpite</div>
+      </div>
+      <div class="dash-cell">
+        <div class="dash-num">5</div>
+        <div class="dash-label">Dossier da analizzare</div>
+      </div>
+      <div class="dash-cell">
+        <div class="dash-num timer" id="timer">90:00</div>
+        <div class="dash-label">Tempo al Comitato di crisi</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="obiettivi">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">01 · Obiettivi didattici</span>
+      <h2>Cosa saprai fare a fine esercitazione</h2>
+    </div>
+    <button class="obj-toggle" id="obj-toggle" type="button">
+      <span>Mostra obiettivi</span><span class="arrow">▾</span>
+    </button>
+    <div class="obj-panel" id="obj-panel">
+      <ul class="obj-list">
+        <li><span class="n">01</span><span>Riconoscere gli indicatori di un attacco che si propaga su <em>più domini</em> — Cyber, Informativo, Cognitivo, Fisico.</span></li>
+        <li><span class="n">02</span><span>Correlare fonti eterogenee — log tecnici, social media, immagini satellitari, HUMINT, email — per ricostruire una kill chain multi-dominio.</span></li>
+        <li><span class="n">03</span><span>Distinguere un effetto <em>tecnico</em> (es. apertura di un breaker SCADA) da un effetto <em>cognitivo</em> (es. panico, sfiducia nelle istituzioni) generato dalla stessa operazione.</span></li>
+        <li><span class="n">04</span><span>Compilare una mappa d'attacco difendibile davanti a un board, con evidenze citate.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="dossier">
+  <div class="wrap">
+
+    <div class="facilitator-note">
+      <span class="eyebrow">Nota per il facilitatore</span>
+      Questa CTF è uno scenario <em>fittizio</em> (paese, aziende e persone immaginari) costruito sulle tattiche, tecniche e procedure (TTP) realmente documentate dell'attacco alla rete elettrica ucraina del 23 dicembre 2015, condotto dal gruppo Sandworm/APT con il malware BlackEnergy3 e KillDisk. Il debrief finale (Sezione 6) collega esplicitamente lo scenario al caso reale, così gli studenti verificano la propria mappa contro i fatti storici. In modalità facilitatore la Sezione 6 e la mappa d'attacco completa sono sempre visibili.
+    </div>
+
+    <div class="section-head">
+      <span class="eyebrow">02 · Materiali degli studenti</span>
+      <h2>Cinque dossier, cinque fonti, una kill chain</h2>
+    </div>
+
+    <div class="filestack">
+
+      <!-- ALFA -->
+      <div class="dossier" id="d-alfa">
+        <div class="dossier-tab" data-target="d-alfa">
+          <div class="dossier-tab-left">
+            <span class="chevron">▸</span>
+            <span class="codename">ALFA</span>
+            <span class="domain-badge badge-cyber">Cyber</span>
+            <span class="dossier-title">Estratto log SOC — Nordenergo</span>
+          </div>
+          <span class="dossier-time" data-time="alfa"></span>
+          <span class="dossier-status" data-status="alfa">Non risolto</span>
+        </div>
+        <div class="dossier-body">
+          <div class="dossier-body-inner">
+            <div class="log" data-stamp="SOC LOG">[SOC-Nordenergo] EVENT LOG (fuso orario locale, troncato)
+
+2024-05-11 09:14:02  MAIL-GW   ALLERT: allegato .xls "Fattura_Q2_manutenzione.xls"
+                       ricevuto da mittente esterno "appalti-energetici[.]net"
+                       verso ufficio.acquisti@nordenergo.kg — MACRO ABILITATA
+                       dall'utente dopo apertura file.
+
+2024-05-11 09:16:47  EDR       Processo powershell.exe generato da EXCEL.EXE
+                       (parent-child sospetto). Connessione uscente verso
+                       185.221.xx.xx:443 (non catalogato, no cert valido).
+
+2024-05-14→2024-11-02  [GAP DI 6 MESI — nessun alert critico registrato.
+                       Movimento laterale non rilevato dai sistemi esistenti.]
+
+2024-11-10 22:03:11  VPN-LOG   Login riuscito su VPN aziendale IT→OT con
+                       credenziali dell'account "d.melnyk" (ruolo: manutenzione
+                       SCADA) da IP interno anomalo, orario fuori turno.
+
+2024-11-14 15:31:04  HMI-LOG   Comandi di apertura remota inviati in sequenza
+                       rapida a 30 interruttori di media tensione (7 nodi da
+                       110kV, 23 nodi da 35kV) — operatore non riconosciuto.
+
+2024-11-14 15:34:50  UPS-LOG   Spegnimento forzato dell'UPS del centralino
+                       PBX (centralino guasti telefonico).
+
+2024-11-14 15:36:12  ENDPOINT  Esecuzione "kdisk.exe" su 14 host della rete
+                       IT: sovrascrittura del Master Boot Record. Log locali
+                       cancellati su 9 host.
+
+2024-11-14 15:40:00  TELCO     Rilevate ~4.000 chiamate/minuto verso il
+                       numero verde guasti — volume 80x la media storica,
+                       provenienza IP telefonia VoIP concentrata.</div>
+
+            <div class="questions">
+              <h4>Domande guida per il team</h4>
+              <div class="qitem"><button class="qbtn">Qual è il dominio a cui fa riferimento questo dossier?<span class="plus">+</span></button><div class="qanswer">Cyber</div></div>
+              <div class="qitem"><button class="qbtn">Qual è la tipologia di sistema vittima?<span class="plus">+</span></button><div class="qanswer">Infrastruttura critica</div></div>
+              <div class="qitem"><button class="qbtn">Qual è l'exploit sfruttato?<span class="plus">+</span></button><div class="qanswer">KillDisk</div></div>
+              <div class="qitem"><button class="qbtn">Quanti mesi separano l'accesso iniziale dall'attacco finale?<span class="plus">+</span></button><div class="qanswer">6 mesi</div></div>
+            </div>
+
+            <div class="flagbox">
+              <h4>Inserisci la flag</h4>
+              <div class="flag-row">
+                <input type="text" placeholder="SSCSS{...}" data-flag-input="alfa" autocomplete="off" spellcheck="false">
+                <button data-flag-check="alfa">Verifica</button>
+              </div>
+              <div class="flag-feedback" data-flag-feedback="alfa"></div>
+              <button class="hint-toggle" data-hint-toggle>💡 Suggerimento formato flag<span class="plus">+</span></button>
+              <div class="hint-body">La flag è del tipo: SSCSS{dominio_vittima_exploit}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BRAVO -->
+      <div class="dossier" id="d-bravo">
+        <div class="dossier-tab" data-target="d-bravo">
+          <div class="dossier-tab-left">
+            <span class="chevron">▸</span>
+            <span class="codename">BRAVO</span>
+            <span class="domain-badge badge-informativo">Informativo</span>
+            <span class="dossier-title">Monitoraggio social media — "Vesti-Social"</span>
+          </div>
+          <span class="dossier-time" data-time="bravo"></span>
+          <span class="dossier-status" data-status="bravo">Non risolto</span>
+        </div>
+        <div class="dossier-body">
+          <div class="dossier-body-inner">
+            <div class="log" data-stamp="OSINT">ESTRATTO MONITORAGGIO OSINT — piattaforma "Vesti-Social"
+Periodo: 14 nov, ore 15:40–19:00
+
+[15:42] @kholm_energia_ufficiale (account NON verificato, creato 3 gg fa,
+        1.200 follower, avatar stock-photo):
+        "Guasto tecnico dovuto a sovraccarico da freddo estremo. Nessun
+        collegamento con attacchi esterni. Le squadre sono già al lavoro."
+        ↳ 8.400 condivisioni in 40 minuti
+
+[15:55] @NordenergoUfficiale (account VERIFICATO, canale reale dell'azienda):
+        "Stiamo verificando la causa dell'interruzione. Il centralino guasti
+        è momentaneamente non raggiungibile per volume di chiamate anomalo."
+        ↳ 340 condivisioni
+
+[16:10] Cluster di 47 account creati tra ottobre e novembre (bot-pattern:
+        stesso orario di creazione, stessa bio, follow reciproci) pubblicano
+        varianti del medesimo messaggio: "Il governo nasconde la vera causa,
+        è un sabotaggio interno dei sindacati energetici"
+
+[17:07] Hashtag locale trend: "#GovernoCiMenteAlFreddo" — analisi rete
+        mostra amplificazione iniziale (circa 3 condivisioni) da 3 nodi
+        identici a quelli del cluster delle 16:10
+
+[17:10] Stesso hashtag — amplificazione a circa 20 condivisioni, stessi 3 nodi
+
+[17:30] Media statale di un paese confinante rilancia la narrativa del
+        "sabotaggio interno", citando "fonti anonime vicine al dossier"
+
+[19:00] Stesso hashtag — amplificazione a circa 2.000 condivisioni, stessi 3 nodi</div>
+
+            <div class="questions">
+              <h4>Domande guida</h4>
+              <div class="qitem"><button class="qbtn">Qual è il dominio a cui fa riferimento questo dossier?<span class="plus">+</span></button><div class="qanswer">Informativo</div></div>
+              <div class="qitem"><button class="qbtn">Qual è l'assetto vittima di questa tipologia di attacco?<span class="plus">+</span></button><div class="qanswer">Le persone</div></div>
+              <div class="qitem"><button class="qbtn">Quale account ha diffusione più rapida: ufficiale o fake?<span class="plus">+</span></button><div class="qanswer">Il fake</div></div>
+              <div class="qitem"><button class="qbtn">Qual è l'exploit sfruttato?<span class="plus">+</span></button><div class="qanswer">La narrativa</div></div>
+              <div class="qitem"><button class="qbtn">Il cluster di 47 account è rumore organico o operazione coordinata?<span class="plus">+</span></button><div class="qanswer">Coordinata — stesso orario di creazione, stessa bio, follow reciproci</div></div>
+            </div>
+
+            <div class="flagbox">
+              <h4>Inserisci la flag</h4>
+              <div class="flag-row">
+                <input type="text" placeholder="SSCSS{...}" data-flag-input="bravo" autocomplete="off" spellcheck="false">
+                <button data-flag-check="bravo">Verifica</button>
+              </div>
+              <div class="flag-feedback" data-flag-feedback="bravo"></div>
+              <button class="hint-toggle" data-hint-toggle>💡 Suggerimento formato flag<span class="plus">+</span></button>
+              <div class="hint-body">La flag è del tipo: SSCSS{dominio_vittima_exploit}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARLIE -->
+      <div class="dossier" id="d-charlie">
+        <div class="dossier-tab" data-target="d-charlie">
+          <div class="dossier-tab-left">
+            <span class="chevron">▸</span>
+            <span class="codename">CHARLIE</span>
+            <span class="domain-badge badge-fisico">Fisico</span>
+            <span class="dossier-title">Immagini satellitari — Cella Geo-Int</span>
+          </div>
+          <span class="dossier-time" data-time="charlie"></span>
+          <span class="dossier-status" data-status="charlie">Non risolto</span>
+        </div>
+        <div class="dossier-body">
+          <div class="dossier-body-inner">
+            <div class="log" data-stamp="GEO-INT">RAPPORTO IMAGERY ANALYSIS — Cella Geo-Int, Kholmgrad
+Sensore: ottico multispettrale, risoluzione 0.5m — passaggi 14:00 / 16:30 / 20:00
+
+PASSAGGIO 14:00 (pre-evento):
+- Sottostazione "Nord-7" (47.xx N, 24.xx E): attività nominale, 2 veicoli
+  di servizio nel parcheggio, nessuna anomalia termica.
+- Sottostazione "Karpat-3": nominale.
+
+PASSAGGIO 16:30 (post-evento, +55 min dal blackout):
+- Sottostazione "Nord-7": ILLUMINAZIONE PERIMETRALE SPENTA. Firma termica
+  dei trasformatori in calo (coerente con apertura interruttori, non con
+  danno fisico da esplosivo o incendio — nessuna traccia termica anomala
+  o detriti).
+- Cancello di accesso secondario: RISULTA APERTO, non risulta nei log
+  di accesso ordinario del sito (verificare con Dossier DELTA).
+- Nessun assembramento di persone, nessun veicolo non autorizzato visibile.
+
+PASSAGGIO 20:00:
+- Nord-7: illuminazione perimetrale ripristinata parzialmente. Un veicolo
+  tecnico presente (probabile squadra di ripristino manuale).
+- Nessuna variazione strutturale rispetto al passaggio delle 14:00 su
+  nessuna delle tre sottostazioni monitorate.
+
+VALUTAZIONE ANALISTA: l'interruzione è coerente con un'apertura degli
+interruttori COMANDATA DA REMOTO (nessun danno fisico agli asset), ma
+l'accesso fisico anomalo al cancello secondario di Nord-7 richiede
+riscontro con fonti umane sul terreno.</div>
+
+            <div class="questions">
+              <h4>Domande guida</h4>
+              <div class="qitem"><button class="qbtn">Qual è il dominio a cui fa riferimento questo dossier?<span class="plus">+</span></button><div class="qanswer">Fisico</div></div>
+              <div class="qitem"><button class="qbtn">Qual è l'assetto vittima di questa tipologia di attacco?<span class="plus">+</span></button><div class="qanswer">Infrastruttura critica</div></div>
+              <div class="qitem"><button class="qbtn">L'assenza di danni fisici agli impianti cosa dice sulla natura dell'attacco?<span class="plus">+</span></button><div class="qanswer">Comando remoto, non sabotaggio manuale</div></div>
+            </div>
+
+            <div class="flagbox">
+              <h4>Inserisci la flag</h4>
+              <div class="flag-row">
+                <input type="text" placeholder="SSCSS{...}" data-flag-input="charlie" autocomplete="off" spellcheck="false">
+                <button data-flag-check="charlie">Verifica</button>
+              </div>
+              <div class="flag-feedback" data-flag-feedback="charlie"></div>
+              <button class="hint-toggle" data-hint-toggle>💡 Suggerimento formato flag<span class="plus">+</span></button>
+              <div class="hint-body">La flag è del tipo: SSCSS{dominio_vittima_naturaattacco}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DELTA -->
+      <div class="dossier" id="d-delta">
+        <div class="dossier-tab" data-target="d-delta">
+          <div class="dossier-tab-left">
+            <span class="chevron">▸</span>
+            <span class="codename">DELTA</span>
+            <span class="domain-badge badge-cyberfisico">Cyber–Fisico</span>
+            <span class="dossier-title">Report HUMINT — Fonte "GHIANDA"</span>
+          </div>
+          <span class="dossier-time" data-time="delta"></span>
+          <span class="dossier-status" data-status="delta">Non risolto</span>
+        </div>
+        <div class="dossier-body">
+          <div class="dossier-body-inner">
+            <div class="narrative-block">
+              <div class="src">RAPPORTO FONTE UMANA — Fonte "GHIANDA", affidabilità B (fonte collaudata), credibilità 2 (probabilmente vera)</div>
+              <p>Riferisce quanto segue, riferito da un tecnico manutentore della sottostazione Nord-7 (non presente al momento dei fatti ma turnista successivo):</p>
+              <p>"Il cancello secondario lato est risultava con la serratura elettronica in stato 'manutenzione' da tre settimane — un ticket IT aperto a fine ottobre per un 'aggiornamento firmware' del controllo accessi, mai chiuso. Nessuno in sede ricorda chi abbia richiesto l'intervento. Il fornitore esterno che normalmente gestisce quel sistema, contattato per verifica, dichiara di NON aver ricevuto alcuna richiesta di intervento in quel periodo."</p>
+              <p>Fonte aggiunge, su domanda diretta: "Tra il personale gira voce che l'account dell'operatore SCADA Dmytro M. sia stato usato anche da remoto, ma lui era in ferie quella settimana — le date corrispondono al login VPN del 10 novembre nei log."</p>
+            </div>
+
+            <div class="questions">
+              <h4>Domande guida</h4>
+              <div class="qitem"><button class="qbtn">Qual è il dominio a cui fa riferimento questo dossier?<span class="plus">+</span></button><div class="qanswer">Cyber–Fisico</div></div>
+              <div class="qitem"><button class="qbtn">Questo dossier conferma o smentisce un'ipotesi già emersa in ALFA/CHARLIE?<span class="plus">+</span></button><div class="qanswer">Sì — conferma l'uso di credenziali rubate per l'accesso remoto all'infrastruttura</div></div>
+              <div class="qitem"><button class="qbtn">Un ticket IT "mai chiuso" per un cancello: è un dettaglio cyber, fisico o entrambi?<span class="plus">+</span></button><div class="qanswer">Entrambi</div></div>
+            </div>
+
+            <div class="flagbox">
+              <h4>Inserisci la flag</h4>
+              <div class="flag-row">
+                <input type="text" placeholder="SSCSS{...}" data-flag-input="delta" autocomplete="off" spellcheck="false">
+                <button data-flag-check="delta">Verifica</button>
+              </div>
+              <div class="flag-feedback" data-flag-feedback="delta"></div>
+              <button class="hint-toggle" data-hint-toggle>💡 Suggerimento formato flag<span class="plus">+</span></button>
+              <div class="hint-body">La flag è del tipo: SSCSS{dominio_tipodiaccesso}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ECHO -->
+      <div class="dossier" id="d-echo">
+        <div class="dossier-tab" data-target="d-echo">
+          <div class="dossier-tab-left">
+            <span class="chevron">▸</span>
+            <span class="codename">ECHO</span>
+            <span class="domain-badge badge-cognitivo">Cognitivo</span>
+            <span class="dossier-title">Scambio email — Direzione crisi Nordenergo</span>
+          </div>
+          <span class="dossier-time" data-time="echo"></span>
+          <span class="dossier-status" data-status="echo">Non risolto</span>
+        </div>
+        <div class="dossier-body">
+          <div class="dossier-body-inner">
+            <div class="log" data-stamp="EMAIL">DA: direzione.crisi@nordenergo.kg
+A: comunicazione@nordenergo.kg
+OGGETTO: RE: RE: Bozza comunicato stampa — URGENTE
+ORARIO: 14 nov, 17:05
+
+"Non possiamo confermare 'attacco esterno' finché SOC non conferma al
+100%. Se usciamo con 'sabotaggio' e poi si rivela un guasto, perdiamo
+credibilità. Ma se restiamo vaghi con questo caos sui social, la gente
+si convince della versione del 'sabotaggio sindacale'. Serve una
+dichiarazione ENTRO 30 MINUTI o la narrativa la scrivono altri."
+
+—
+
+DA: comunicazione@nordenergo.kg
+A: direzione.crisi@nordenergo.kg
+OGGETTO: RE: RE: RE: Bozza comunicato stampa — URGENTE
+ORARIO: 14 nov, 17:38 (33 minuti dopo)
+
+"Comunicato uscito ora, generico ('anomalia in corso di verifica,
+squadre operative'). Nel frattempo il trend #GovernoCiMenteAlFreddo è
+già a 12.000 menzioni. Centralino ancora sommerso di chiamate, la gente
+non ha canali per verificare e si affida a quello che gira su Vesti-
+Social. Reparto assistenza clienti riferisce toni aggressivi e paura,
+diverse chiamate di persone anziane preoccupate per riscaldamento ed
+elettromedicali."</div>
+
+            <div class="questions">
+              <h4>Domande guida</h4>
+              <div class="qitem"><button class="qbtn">Qual è il dominio a cui fa riferimento questo dossier?<span class="plus">+</span></button><div class="qanswer">Cognitivo</div></div>
+              <div class="qitem"><button class="qbtn">Cosa ha riempito il "vuoto informativo" di 33 minuti, con quale effetto?<span class="plus">+</span></button><div class="qanswer">Hashtag e disinformazione — l'effetto è instabilità e panico</div></div>
+              <div class="qitem"><button class="qbtn">Qual è l'impatto finale?<span class="plus">+</span></button><div class="qanswer">Sfiducia e paura pubblica</div></div>
+            </div>
+
+            <div class="flagbox">
+              <h4>Inserisci la flag</h4>
+              <div class="flag-row">
+                <input type="text" placeholder="SSCSS{...}" data-flag-input="echo" autocomplete="off" spellcheck="false">
+                <button data-flag-check="echo">Verifica</button>
+              </div>
+              <div class="flag-feedback" data-flag-feedback="echo"></div>
+              <button class="hint-toggle" data-hint-toggle>💡 Suggerimento formato flag<span class="plus">+</span></button>
+              <div class="hint-body">La flag è del tipo: SSCSS{dominio_impatto}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="mappa">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">03 · Scheda di mappatura</span>
+      <h2>Attack Map multi-dominio</h2>
+      <p style="color:var(--text-dim);font-size:14.5px;max-width:68ch;margin-top:10px;">Collega ogni evento → dominio → dossier di supporto → effetto a cascata sul dominio successivo. La mappa completa si sblocca a lavoro di squadra concluso (5/5 flag) o in modalità facilitatore.</p>
+      <p id="map-completion-line" class="completion-badge" style="display:none;margin-top:14px;width:fit-content;">✅ Squadra completa: tutte le flag trovate in <span id="map-completion-time-value"></span></p>
+    </div>
+
+    <div id="map-locked" class="map-locked">🔒 Trova le 5 flag per sbloccare la mappa d'attacco completa.</div>
+
+    <div id="map-content" style="display:none;">
+      <div class="map-table-wrap">
+        <table class="map">
+          <thead><tr><th>#</th><th>Evento</th><th>Dominio primario</th><th>Supporto</th><th>Collegamento al dominio successivo</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Spear-phishing + payload tramite file Excel (.xls)</td><td class="domain">Cyber</td><td>ALFA</td><td>Accesso iniziale → abilita tutto il resto</td></tr>
+            <tr><td>2</td><td>Login VPN anomalo con credenziali "d.melnyk"</td><td class="domain">Cyber</td><td>ALFA + DELTA</td><td>Cyber↔Fisico: le stesse credenziali giustificano l'anomalia sul cancello</td></tr>
+            <tr><td>3</td><td>Cancello secondario in "manutenzione" fittizia</td><td class="domain">Fisico</td><td>CHARLIE + DELTA</td><td>Prepara accesso fisico non rilevato</td></tr>
+            <tr><td>4</td><td>KillDisk</td><td class="domain">Cyber</td><td>ALFA</td><td>Ostacola il ripristino, prolunga l'effetto fisico</td></tr>
+            <tr><td>5</td><td>Account fake + cluster di bot</td><td class="domain">Informativo</td><td>BRAVO</td><td>Riempie il vuoto informativo con narrativa alternativa</td></tr>
+            <tr><td>6</td><td>Ritardo di 33' nel comunicato ufficiale</td><td class="domain">Informativo → Cognitivo</td><td>ECHO</td><td>Il ritardo, reale e comprensibile, diventa terreno fertile per la sfiducia</td></tr>
+            <tr><td>7</td><td>Panico, sfiducia, hashtag virale</td><td class="domain">Cognitivo</td><td>BRAVO + ECHO</td><td>Effetto finale: danno alla fiducia nelle istituzioni, non solo alla rete elettrica</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="briefing-quote" style="margin-top:24px;">Se il vostro unico strumento di difesa fosse stato un SOC cyber classico, quali 3 delle 7 righe sopra NON avreste mai visto arrivare? Cosa serve per vederle?</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="debrief">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">04 · Debrief</span>
+      <h2>Il caso reale</h2>
+    </div>
+
+    <div id="debrief-locked" class="debrief-locked">
+      <div class="lockicon">🔒</div>
+      <p>Il debrief si sblocca a esercizio completato — trova tutte e 5 le flag, oppure attiva la modalità facilitatore in alto.</p>
+    </div>
+
+    <div id="debrief-content" class="debrief-content">
+      <p>Lo scenario è ispirato all'attacco reale alla rete elettrica ucraina del <strong>23 dicembre 2015</strong>. L'attacco ha causato interruzioni di corrente per circa 230.000 utenze per un periodo da 1 a 6 ore, ed è considerato il primo attacco informatico riuscito e pubblicamente riconosciuto contro una rete elettrica. È stato attribuito al gruppo russo <strong>Sandworm</strong>.</p>
+
+      <h3>Cyber</h3>
+      <p>L'attacco ha utilizzato il malware BlackEnergy, diffuso tramite email di spear-phishing con allegati Word/Excel malevoli, che si è poi propagato ai sistemi di controllo industriale (ICS/SCADA) delle aziende colpite. La compromissione iniziale risale a circa otto mesi prima dell'attacco vero e proprio, tramite l'apertura di un allegato Excel da parte di un dipendente. Gli aggressori hanno inoltre condotto un attacco TDoS (Telephonic Denial-of-Service) e spento forzatamente l'alimentazione di continuità del centralino telefonico dell'azienda.</p>
+
+      <h3>Fisico</h3>
+      <p>L'obiettivo finale era interrompere l'energia elettrica per centinaia di migliaia di utenti, e gran parte dello sforzo degli attaccanti è stato dedicato a impedire il ripristino rapido del servizio, non a danneggiare fisicamente gli impianti. La causa reale dell'interruzione non è stata il solo malware, ma la manipolazione diretta e interattiva del sistema di controllo industriale da parte degli attaccanti, con conseguente perdita di controllo da parte degli operatori.</p>
+
+      <h3>Informativo / Cognitivo</h3>
+      <p>Il caso reale non ha avuto la stessa documentazione pubblica di una campagna di disinformazione social contestuale come nello scenario fittizio, ma gli analisti inquadrano l'operazione in una più ampia strategia di guerra ibrida russa, di cui la guerra cibernetica è solo un aspetto. Il blocco del centralino guasti è l'elemento che nello scenario didattico è stato amplificato nella dimensione informativa/cognitiva: impedire ai cittadini di ottenere informazioni verificate crea le condizioni ideali per la disinformazione e il panico — un pattern osservato sistematicamente nelle operazioni ibride russe successive.</p>
+
+      <div class="callout">"Se il vostro unico strumento di difesa fosse stato un SOC cyber classico, quali 3 delle 7 righe della mappa NON avreste mai visto arrivare?"</div>
+
+      <div class="pedagogical">
+        <h4>Punto pedagogico chiave</h4>
+        <p style="margin:0;">Nel caso reale un SOC concentrato solo sul dominio cyber avrebbe visto "malware, movimento laterale, comandi SCADA anomali" — ma non avrebbe visto il quadro completo: il blocco della comunicazione con i cittadini, la vulnerabilità del "canale di verità" in una crisi. Lo scenario "Blackout Ibrido" esagera didatticamente la componente informativa/cognitiva proprio per allenare gli studenti a cercarla anche quando le fonti tecniche sembrano bastare.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Scenario interamente fittizio (paese, aziende e persone immaginari), costruito a scopo didattico su TTP realmente documentate. Modulo 1 — Cyber-Social Security in Multi-Domain Operations.
+  </div>
+</footer>
+
+<script>
+(function(){
+  var FLAGS = {
+    alfa:   ["SSCSS{cyber_infrastrutturacritica_killdisk}"],
+    bravo:  ["SSCSS{informativo_persone_narrativa}", "SSCSS{info_narrativa_coordinata_sabotaggio_interno}"],
+    charlie:["SSCSS{fisico_infrastrutturacritica_comandoremoto}"],
+    delta:  ["SSCSS{cyberfisico_remoto}"],
+    echo:   ["SSCSS{cognitivo_sfiducia}", "SSCSS{cognitivo_vuoto_informativo_sfiducia_paura_pubblica}"]
+  };
+
+  // Password facilitatore — protezione lato client, pensata per uso in aula
+  // (non è una vera autenticazione: chi guarda il codice sorgente la vede).
+  // Per cambiarla, modifica la stringa qui sotto e ripubblica la pagina.
+  var FACILITATOR_PASSWORD = "admin_password";
+
+  var STORAGE_KEY = "blackout-ibrido-progress";
+  var TIME_KEY = "blackout-ibrido-times";
+  var START_KEY = "blackout-ibrido-start";
+  var COMPLETE_KEY = "blackout-ibrido-complete";
+  var solved = {};
+  var times = {};   // { key: { start: ts, solvedAt: ts|null } }
+  var exerciseStart = null;
+  var completionTime = null;
+  try{ solved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ solved = {}; }
+  try{ times = JSON.parse(localStorage.getItem(TIME_KEY)) || {}; }catch(e){ times = {}; }
+  try{ exerciseStart = JSON.parse(localStorage.getItem(START_KEY)) || null; }catch(e){ exerciseStart = null; }
+  try{ completionTime = JSON.parse(localStorage.getItem(COMPLETE_KEY)) || null; }catch(e){ completionTime = null; }
+
+  function saveTimes(){ localStorage.setItem(TIME_KEY, JSON.stringify(times)); }
+
+  function norm(s){
+    return s.trim().toLowerCase().replace(/\s+/g,"");
+  }
+
+  function fmt(seconds){
+    seconds = Math.max(0, Math.round(seconds));
+    var m = Math.floor(seconds/60), s = seconds%60;
+    return (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+  }
+
+  var mainTimerFrozen = false;
+
+  function updateProgress(){
+    var count = 0;
+    Object.keys(FLAGS).forEach(function(k){
+      var dot = document.querySelector('.progress-dots span[data-d="'+k+'"]');
+      var statusEl = document.querySelector('.dossier-status[data-status="'+k+'"]');
+      var timeEl = document.querySelector('.dossier-time[data-time="'+k+'"]');
+      if(solved[k]){
+        count++;
+        if(dot) dot.classList.add("on");
+        if(statusEl){ statusEl.textContent = "Risolto"; statusEl.classList.add("solved"); }
+        var input = document.querySelector('input[data-flag-input="'+k+'"]');
+        var btn = document.querySelector('button[data-flag-check="'+k+'"]');
+        if(input){ input.disabled = true; }
+        if(btn){ btn.disabled = true; btn.textContent = "✓"; }
+        if(timeEl && times[k] && times[k].solvedAt && times[k].start){
+          timeEl.textContent = fmt((times[k].solvedAt - times[k].start)/1000);
+          timeEl.classList.add("solved");
+        }
+      }
+    });
+    document.getElementById("progress-text").textContent = count + "/5 FLAG";
+
+    var allSolved = count === 5;
+
+    if(allSolved && !mainTimerFrozen){
+      mainTimerFrozen = true;
+      clearInterval(timerInterval);
+      timerEl.classList.add("solved");
+    }
+
+    var facilitator = document.body.classList.contains("facilitator");
+
+    document.getElementById("map-locked").style.display = (allSolved || facilitator) ? "none" : "block";
+    document.getElementById("map-content").style.display = (allSolved || facilitator) ? "block" : "none";
+
+    var unlocked = allSolved || facilitator;
+    document.getElementById("debrief-locked").style.display = unlocked ? "none" : "block";
+    document.getElementById("debrief-content").classList.toggle("unlocked", unlocked);
+
+    var completionBadge = document.getElementById("completion-badge");
+    var mapCompletionLine = document.getElementById("map-completion-line");
+    if(allSolved){
+      if(!completionTime){
+        completionTime = Date.now();
+        localStorage.setItem(COMPLETE_KEY, JSON.stringify(completionTime));
+      }
+      var totalLabel = (exerciseStart) ? fmt((completionTime - exerciseStart)/1000) : "—";
+      document.getElementById("completion-time-value").textContent = totalLabel;
+      document.getElementById("map-completion-time-value").textContent = totalLabel;
+      completionBadge.style.display = "inline-flex";
+      mapCompletionLine.style.display = "flex";
+    } else {
+      completionBadge.style.display = "none";
+      mapCompletionLine.style.display = "none";
+    }
+  }
+
+  // Registra l'apertura di un dossier come "inizio cronometro" per quel dossier
+  function markDossierStart(key){
+    if(!exerciseStart){
+      exerciseStart = Date.now();
+      localStorage.setItem(START_KEY, JSON.stringify(exerciseStart));
+    }
+    if(!times[key]) times[key] = {start:null, solvedAt:null};
+    if(!times[key].start){
+      times[key].start = Date.now();
+      saveTimes();
+    }
+  }
+
+  document.querySelectorAll("[data-flag-check]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var key = btn.getAttribute("data-flag-check");
+      var input = document.querySelector('input[data-flag-input="'+key+'"]');
+      var feedback = document.querySelector('[data-flag-feedback="'+key+'"]');
+      var val = norm(input.value);
+      var accepted = FLAGS[key].map(norm);
+      if(accepted.indexOf(val) !== -1){
+        solved[key] = true;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(solved));
+        if(!times[key]) times[key] = {start:Date.now(), solvedAt:null};
+        if(!times[key].solvedAt){ times[key].solvedAt = Date.now(); saveTimes(); }
+        feedback.textContent = "✓ Flag corretta.";
+        feedback.className = "flag-feedback ok";
+        updateProgress();
+      } else {
+        feedback.textContent = "✗ Flag non corretta, riprova.";
+        feedback.className = "flag-feedback err";
+      }
+    });
+  });
+
+  document.querySelectorAll('input[data-flag-input]').forEach(function(input){
+    input.addEventListener("keydown", function(e){
+      if(e.key === "Enter"){
+        var key = input.getAttribute("data-flag-input");
+        document.querySelector('button[data-flag-check="'+key+'"]').click();
+      }
+    });
+  });
+
+  document.querySelectorAll(".dossier-tab").forEach(function(tab){
+    tab.addEventListener("click", function(){
+      var el = document.getElementById(tab.getAttribute("data-target"));
+      el.classList.toggle("open");
+      if(el.classList.contains("open")){
+        markDossierStart(el.id.replace("d-",""));
+      }
+    });
+  });
+
+  function refreshQuestionIcons(){
+    var isFac = document.body.classList.contains("facilitator");
+    document.querySelectorAll(".qbtn").forEach(function(qb){
+      var ans = qb.nextElementSibling;
+      var plus = qb.querySelector(".plus");
+      if(!isFac){
+        ans.classList.remove("show");
+        plus.textContent = "🔒";
+      } else {
+        plus.textContent = ans.classList.contains("show") ? "–" : "+";
+      }
+    });
+  }
+
+  document.querySelectorAll(".qbtn").forEach(function(qb){
+    qb.addEventListener("click", function(){
+      if(!document.body.classList.contains("facilitator")) return; // risposte visibili solo al facilitatore
+      var ans = qb.nextElementSibling;
+      ans.classList.toggle("show");
+      qb.querySelector(".plus").textContent = ans.classList.contains("show") ? "–" : "+";
+    });
+  });
+  refreshQuestionIcons();
+
+  document.querySelectorAll("[data-hint-toggle]").forEach(function(hb){
+    hb.addEventListener("click", function(){
+      var body = hb.nextElementSibling;
+      body.classList.toggle("show");
+      hb.querySelector(".plus").textContent = body.classList.contains("show") ? "–" : "+";
+    });
+  });
+
+  // Obiettivi didattici: finestra nascosta di default
+  var objToggle = document.getElementById("obj-toggle");
+  var objPanel = document.getElementById("obj-panel");
+  objToggle.addEventListener("click", function(){
+    var isOpen = objPanel.classList.toggle("open");
+    objToggle.classList.toggle("open", isOpen);
+    objToggle.querySelector("span").textContent = isOpen ? "Nascondi obiettivi" : "Mostra obiettivi";
+  });
+
+  // Modalità facilitatore: protetta da password
+  var facilitatorBtn = document.getElementById("facilitator-btn");
+  var facilitatorIcon = document.getElementById("facilitator-icon");
+  facilitatorBtn.addEventListener("click", function(){
+    var active = document.body.classList.contains("facilitator");
+    if(active){
+      document.body.classList.remove("facilitator");
+      facilitatorBtn.classList.remove("active");
+      facilitatorIcon.textContent = "🔒";
+      refreshQuestionIcons();
+      updateProgress();
+      return;
+    }
+    var pwd = window.prompt("Password modalità facilitatore: (dc3565645d8002becb5fd7977aeef3e1)");
+    if(pwd === null) return;
+    if(pwd === FACILITATOR_PASSWORD){
+      document.body.classList.add("facilitator");
+      facilitatorBtn.classList.add("active");
+      facilitatorIcon.textContent = "🔓";
+      refreshQuestionIcons();
+      updateProgress();
+    } else {
+      alert("Password errata.");
+    }
+  });
+
+  // Countdown timer 90:00
+  var totalSeconds = 90 * 60;
+  var timerEl = document.getElementById("timer");
+  var timerInterval = setInterval(function(){
+    totalSeconds--;
+    if(totalSeconds <= 0){
+      totalSeconds = 0;
+      timerEl.textContent = "00:00";
+      timerEl.classList.add("expired");
+      clearInterval(timerInterval);
+      return;
+    }
+    timerEl.textContent = fmt(totalSeconds);
+  }, 1000);
+
+  // Reset: riporta l'esercitazione allo stato di prima apertura
+  var resetBtn = document.getElementById("reset-btn");
+  resetBtn.addEventListener("click", function(){
+    var sure = window.confirm("Reset esercitazione: verranno cancellati flag trovate, tempi e progressi. Continuare?");
+    if(!sure) return;
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(TIME_KEY);
+    localStorage.removeItem(START_KEY);
+    localStorage.removeItem(COMPLETE_KEY);
+    window.location.reload();
+  });
+
+  updateProgress();
+})();
+</script>
+  <footer class="site-footer team-site-footer" aria-label="Cyber-Social Security">
+    <div class="team-footer-inner">
+      <img
+        class="footer-banner"
+        src="https://vitabarl.github.io/trident-shield-ctf/assets/logos/banner_CTF.png"
+        alt="UniBa SERLAB SER&P CrASte"
+        loading="lazy"
+      >
+    </div>
+  </footer>
+</body>
+</html>

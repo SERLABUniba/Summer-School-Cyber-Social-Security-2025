@@ -1,0 +1,45 @@
+services:
+  web:
+    build: .
+    container_name: maritime-xss-web
+    ports:
+      - "127.0.0.1:8082:5000"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: maritime_ctf
+      DB_USER: ctf_user
+      DB_PASSWORD: ctf_password
+      FLAG: "SSCSS{stored_xss_commenti_non_sanitizzati}"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - xss-net
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: maritime-xss-db
+    environment:
+      POSTGRES_DB: maritime_ctf
+      POSTGRES_USER: ctf_user
+      POSTGRES_PASSWORD: ctf_password
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - postgres_xss_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ctf_user -d maritime_ctf"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - xss-net
+    restart: unless-stopped
+
+volumes:
+  postgres_xss_data:
+
+networks:
+  xss-net:
+    driver: bridge

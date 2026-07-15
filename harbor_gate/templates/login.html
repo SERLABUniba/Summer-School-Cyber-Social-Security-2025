@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Comando Navale | Accesso riservato</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script>
+    window.LOGIN_API_URL = "{{ url_for('login') }}";
+  </script>
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="brand-panel">
+      <div class="mark">CN</div>
+      <p class="eyebrow">Rete operativa classificata</p>
+      <h1>Comando Navale</h1>
+      <p class="subtitle">Portale gestionale e coordinamento operativo</p>
+
+      <div class="notice">
+        <strong>Area ad accesso controllato</strong>
+        <span>Ogni attività viene registrata ai fini di sicurezza.</span>
+      </div>
+    </section>
+
+    <section class="form-panel">
+      <div class="form-heading">
+        <p class="eyebrow">Identificazione utente</p>
+        <h2>Accesso al portale</h2>
+        <p>Inserire le credenziali di servizio assegnate.</p>
+      </div>
+
+      <form id="login-form">
+        <label for="username">Identificativo operatore</label>
+        <input id="username" name="username" type="text" autocomplete="username" required>
+
+        <label for="password">Codice di accesso</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+        <p id="error-box" class="error-box" aria-live="polite"></p>
+
+        <button type="submit">Accedi al sistema <span>→</span></button>
+      </form>
+
+      <footer>CN-OPS v2.6 · Ambiente di addestramento</footer>
+    </section>
+  </main>
+  <footer class="site-footer team-site-footer" aria-label="Cyber-Social Security">
+  <div class="team-footer-inner">
+    <img
+      class="footer-banner"
+      src="https://vitabarl.github.io/trident-shield-ctf/assets/logos/banner_CTF.png"
+      alt="UniBa SERLAB SER&P CrASte"
+      loading="lazy"
+    >
+  </div>
+</footer>
+</body>
+</html>

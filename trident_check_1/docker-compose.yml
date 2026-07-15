@@ -1,0 +1,7 @@
+services:
+  naval-speedtest:
+    build: .
+    container_name: naval-speedtest
+    ports:
+      - "127.0.0.1:8083:5000"
+    restart: unless-stopped

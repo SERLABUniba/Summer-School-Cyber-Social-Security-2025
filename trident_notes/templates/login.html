@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Accesso | Comando Marittimo Tirreno{% endblock %}
+
+{% block content %}
+<p class="eyebrow">Area Riservata</p>
+<h1>Accesso al Portale</h1>
+<p class="lead">Inserisci le tue credenziali operative per continuare.</p>
+
+<form class="comment-form" method="post" action="{{ url_for('login') }}" style="max-width: 400px; margin-top: 2rem;">
+  <label for="username">Identificativo (Username)</label>
+  <input id="username" name="username" type="text" required>
+
+  <label for="password">Codice di Sicurezza (Password)</label>
+  <input id="password" name="password" type="password" required>
+
+  <button type="submit">Accedi</button>
+  
+  <p style="margin-top: 1rem; font-size: 0.9em;">
+    Non hai un accesso? <a href="{{ url_for('register') }}">Registrati qui</a>.
+  </p>
+</form>
+{% endblock %}

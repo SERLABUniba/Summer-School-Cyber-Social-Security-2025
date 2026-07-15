@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Comando Marittimo Tirreno{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}">
+      <span class="brand-mark">CMT</span>
+      <span>
+        <strong>Comando Marittimo Tirreno</strong>
+        <small>Portale comunicazioni operative</small>
+      </span>
+    </a>
+
+    <span class="status">
+      <i></i>
+      Rete informativa attiva
+    </span>
+  </header>
+
+  <div class="shell">
+<aside class="sidebar">
+      <p class="nav-label">Comunicazioni</p>
+      
+      {% if session.get('user_id') %}
+        <p style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 1rem;">
+          Operatore: <strong>{{ session.username }}</strong>
+        </p>
+        <a class="active" href="{{ url_for('index') }}">I miei Post</a>
+        <a href="#">Circolari operative</a>
+        <a href="#">Addestramento</a>
+        <a href="{{ url_for('logout') }}" style="color: #dc3545; margin-top: 1rem;">Disconnetti</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Accesso</a>
+        <a href="{{ url_for('register') }}">Registrazione</a>
+      {% endif %}
+
+      <div class="security-note">
+        <strong>Portale interno</strong>
+        <span>Ambiente addestrativo CTF</span>
+      </div>
+    </aside>
+
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+<footer class="site-footer team-site-footer" aria-label="Cyber-Social Security">
+  <div class="team-footer-inner">
+    <img
+      class="footer-banner"
+      src="https://vitabarl.github.io/trident-shield-ctf/assets/logos/banner_CTF.png"
+      alt="UniBa SERLAB SER&P CrASte"
+      loading="lazy"
+    >
+  </div>
+</footer>
+</body>
+</html>

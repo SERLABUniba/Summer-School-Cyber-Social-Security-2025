@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Bacheca | Comando Marittimo Tirreno{% endblock %}
+
+{% block content %}
+<p class="eyebrow">Bacheca istituzionale</p>
+<h1>Direttive operative</h1>
+<p class="lead">Comunicazioni, aggiornamenti e messaggi del Comando.</p>
+
+<section class="post-list">
+  {% for post in posts %}
+  <article class="post-card">
+    <div class="post-meta">
+      <span>{{ post.author }}</span>
+      <span>•</span>
+      <time>{{ post.published_at.strftime("%d/%m/%Y") }}</time>
+    </div>
+
+    <h2>{{ post.title }}</h2>
+    <p>{{ post.excerpt }}</p>
+
+    <a class="read-more" href="{{ url_for('post', post_id=post.id) }}">
+      Leggi comunicazione <span>→</span>
+    </a>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Comando Navale | Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="dashboard-page">
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}"><span>CN</span> Comando Navale</a>
+    <div class="user-area">
+      <span>{{ user.full_name }} · {{ user.role }}</span>
+      <form action="{{ url_for('logout') }}" method="post">
+        <button class="logout" type="submit">Esci</button>
+      </form>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <p class="sidebar-title">Navigazione</p>
+      <a class="active" href="{{ url_for('dashboard') }}">Quadro operativo</a>
+      <a href="#">Flotta e assetti</a>
+      <a href="#">Comunicazioni</a>
+      <a href="#">Logistica</a>
+      <a href="#">Documenti riservati</a>
+    </aside>
+
+    <main class="content">
+      <p class="eyebrow">Sessione autenticata</p>
+      <h1>Quadro operativo</h1>
+      <p class="welcome">Benvenuto, <strong>{{ user.full_name }}</strong>. Stato della rete: <span class="online">OPERATIVA</span>.</p>
+
+      {% if flag %}
+      <section class="flag-card">
+        <p class="eyebrow">Classificazione: riservato</p>
+        <h2>Accesso Stato Maggiore autorizzato</h2>
+        <p>Token di verifica della missione:</p>
+        <code>{{ flag }}</code>
+      </section>
+      {% else %}
+      <section class="restricted-card">
+        <h2>Area a privilegio elevato</h2>
+        <p>Il tuo profilo non dispone dell'autorizzazione necessaria per visualizzare i documenti dello Stato Maggiore.</p>
+      </section>
+      {% endif %}
+
+      <section class="status-grid">
+        <article><span>Assetti monitorati</span><strong>12</strong></article>
+        <article><span>Canali attivi</span><strong>08</strong></article>
+        <article><span>Avvisi aperti</span><strong>03</strong></article>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer team-site-footer" aria-label="Cyber-Social Security">
+    <div class="team-footer-inner">
+      <img
+        class="footer-banner"
+        src="https://vitabarl.github.io/trident-shield-ctf/assets/logos/banner_CTF.png"
+        alt="UniBa SERLAB SER&P CrASte"
+        loading="lazy"
+      >
+    </div>
+  </footer>
+</body>
+</html>

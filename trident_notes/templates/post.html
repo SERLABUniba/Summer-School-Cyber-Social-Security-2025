@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }} | CMT{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ url_for('index') }}">← Torna alla bacheca</a>
+
+<article class="article">
+  <div class="post-meta">
+    <span>{{ article.author }}</span>
+    <span>•</span>
+    <time>{{ article.published_at.strftime("%d/%m/%Y alle %H:%M") }}</time>
+  </div>
+
+  <h1>{{ article.title }}</h1>
+
+  <div class="article-body">
+    {{ article.body | replace('\n', '<br>') | safe }}
+  </div>
+</article>
+
+<section class="comments-section">
+  <div class="section-title">
+    <div>
+      <p class="eyebrow">Discussione</p>
+      <h2>I tuoi commenti</h2>
+    </div>
+    {% if session.get('user_id') %}
+      <span class="comment-count">{{ comments|length }} messaggi</span>
+    {% endif %}
+  </div>
+
+  {% if session.get('user_id') %}
+    <form class="comment-form" method="post" action="{{ url_for('add_comment', post_id=article.id) }}">
+      <label for="author">Nominativo (Registrato)</label>
+      <input id="author" name="author" value="{{ session.username }}" readonly style="background-color: #f0f0f0; cursor: not-allowed;">
+
+      <label for="body">Commento</label>
+      <textarea id="body" name="body" maxlength="2000" placeholder="Scrivi un commento privato..." required></textarea>
+
+      <button type="submit">Pubblica commento</button>
+    </form>
+
+    <div class="comments">
+      {% for comment in comments %}
+      <article class="comment">
+        <header>
+          <strong>{{ comment.author }}</strong>
+          <time>{{ comment.created_at.strftime("%d/%m/%Y %H:%M") }}</time>
+        </header>
+
+        <div class="comment-body">{{ comment.body | safe }}</div>
+      </article>
+      {% else %}
+      <p class="empty-comments">Non hai ancora pubblicato commenti su questa comunicazione.</p>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="text-align: center; padding: 2rem; border: 1px dashed var(--border-color); border-radius: 6px;">
+      <p class="empty-comments" style="margin-bottom: 1rem;">Devi effettuare l'accesso per visualizzare e inserire i tuoi commenti.</p>
+      <a class="read-more" href="{{ url_for('login') }}" style="display: inline-block;">Accedi al portale <span>→</span></a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
