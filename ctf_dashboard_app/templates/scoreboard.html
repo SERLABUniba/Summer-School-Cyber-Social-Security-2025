@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Scoreboard{% endblock %}
+
+{% block content %}
+<section class="team-scoreboard">
+  <div class="scoreboard-head">
+    <div>
+      <p class="eyebrow">Classifica live</p>
+      <h2>Scoreboard esercitazione</h2>
+      <p>Panoramica pubblica di punteggi, moduli completati e integrità operativa dei gruppi nave.</p>
+    </div>
+    <div class="team-controls">
+      <label>
+        <span>Totale moduli</span>
+        <input type="text" value="{{ modules|length }}" readonly>
+      </label>
+    </div>
+  </div>
+
+  <div class="team-grid">
+    {% for team in teams %}
+    <article class="ship-card {% if loop.first %}leader{% endif %}" style="--accent: {{ team.accent }};">
+      <div class="ship-header">
+        <div>
+          <h2 class="team-name">{{ team.name }}</h2>
+          <div class="team-code">{{ team.code }}</div>
+        </div>
+        <div class="rank">{{ loop.index }}</div>
+      </div>
+
+      <div class="score-row">
+        <div class="score">{{ team.score }}</div>
+        <div class="score-label">
+          punti<br>
+          {{ team.solved_count }}/{{ modules|length }} moduli
+        </div>
+      </div>
+
+      <div class="ship-wrap {% for c in team.damaged %}damage-{{ c }} {% endfor %}" aria-label="Nave {{ team.name }}">
+        <div class="sea"></div>
+        <div class="ship">
+          <div class="smoke s1"></div>
+          <div class="smoke s2"></div>
+          <div class="mast"></div>
+          <div class="sail sail-front"></div>
+          <div class="sail sail-main"></div>
+          <div class="bridge"></div>
+          <div class="radar"></div>
+          <div class="deck"></div>
+          <div class="hull"></div>
+          <div class="rudder"></div>
+          <div class="compass"></div>
+
+          <span class="component {% if 'radar' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="radar">RD</span>
+          <span class="component {% if 'compass' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="compass">BS</span>
+          <span class="component {% if 'rudder' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="rudder">TM</span>
+          <span class="component {% if 'sails' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="sails">CM</span>
+        </div>
+      </div>
+
+      <div class="integrity">
+        <div class="integrity-head">
+          <span>Integrità assetto</span>
+          <span>{{ team.integrity }}%</span>
+        </div>
+        <div class="bar">
+          <span style="--value: {{ team.integrity }}%;"></span>
+        </div>
+      </div>
+
+      <div class="domain-score-grid">
+        <div class="domain-score">
+          <span>Punti</span>
+          <strong>{{ team.score }}</strong>
+          <small>score totale</small>
+        </div>
+        <div class="domain-score">
+          <span>Moduli</span>
+          <strong>{{ team.solved_count }}</strong>
+          <small>risolti</small>
+        </div>
+        <div class="domain-score {% if 'radar' in team.damaged %}lost{% endif %}">
+          <span>Radar</span>
+          <strong>{% if 'radar' in team.damaged %}KO{% else %}OK{% endif %}</strong>
+          <small>cyber</small>
+        </div>
+        <div class="domain-score {% if 'sails' in team.damaged %}lost{% endif %}">
+          <span>Comms</span>
+          <strong>{% if 'sails' in team.damaged %}KO{% else %}OK{% endif %}</strong>
+          <small>informazione</small>
+        </div>
+      </div>
+
+      <a class="ship-detail-link" href="{{ url_for('inspect_team', team_id=team.id) }}">Dettaglio squadra</a>
+    </article>
+    {% endfor %}
+  </div>
+
+  <div class="scoreboard-bottom">
+    <section class="leaderboard-panel">
+      <h3>Ordine classifica</h3>
+      <div id="team-leaderboard">
+        {% for team in teams %}
+        <div class="team-rank" style="--team-color: {{ team.accent }};">
+          <b>{{ loop.index }}</b>
+          <span>
+            {{ team.name }}
+            <small>{{ team.code }} · {{ team.solved_count }}/{{ modules|length }} moduli</small>
+          </span>
+          <strong>{{ team.score }}</strong>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="score-log-panel">
+      <h3>Stato flotte</h3>
+      <div id="score-log">
+        {% for team in teams %}
+        <div class="score-log-entry">
+          <time>{{ team.integrity }}%</time>
+          <span>
+            <strong>{{ team.name }}</strong><br>
+            Componenti danneggiati:
+            {% if team.damaged %}
+              {{ team.damaged | join(', ') }}
+            {% else %}
+              nessuno
+            {% endif %}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</section>
+{% endblock %}

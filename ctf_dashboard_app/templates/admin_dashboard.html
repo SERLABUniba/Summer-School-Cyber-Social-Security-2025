@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="team-scoreboard">
+  <div class="scoreboard-head">
+    <div>
+      <p class="eyebrow">Centro di comando</p>
+      <h2>Dashboard Amministrazione</h2>
+      <p>Controlla lo stato delle navi, l'avanzamento dei team e l'abilitazione dei moduli operativi.</p>
+    </div>
+  </div>
+
+  <div class="team-grid">
+    {% for team in teams %}
+    <article class="ship-card admin-team-card {% if loop.index == 1 %}leader{% endif %}" style="--accent: {{ team.accent }};">
+      <div class="ship-header">
+        <div>
+          <h2 class="team-name">{{ team.name }}</h2>
+          <div class="team-code">{{ team.code }}</div>
+        </div>
+        <div class="rank">{{ team.solved_count }}</div>
+      </div>
+
+      <div class="score-row">
+        <div class="score">{{ team.score }}</div>
+        <div class="score-label">
+          punti<br>
+          integrità {{ team.integrity }}%
+        </div>
+      </div>
+
+      <div class="ship-wrap
+        {% if 'radar' in team.damaged %} damage-radar{% endif %}
+        {% if 'sails' in team.damaged %} damage-sails{% endif %}
+        {% if 'compass' in team.damaged %} damage-compass{% endif %}
+        {% if 'rudder' in team.damaged %} damage-rudder{% endif %}
+      ">
+        <div class="sea"></div>
+
+        <div class="ship">
+          <div class="hull"></div>
+          <div class="deck"></div>
+          <div class="bridge"></div>
+          <div class="mast"></div>
+          <div class="sail sail-main"></div>
+          <div class="sail sail-front"></div>
+          <div class="radar"></div>
+          <div class="compass"></div>
+          <div class="rudder"></div>
+
+          <div class="component {% if 'radar' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="radar">RD</div>
+          <div class="component {% if 'sails' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="sails">CM</div>
+          <div class="component {% if 'compass' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="compass">BS</div>
+          <div class="component {% if 'rudder' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="rudder">TM</div>
+
+          <div class="smoke s1"></div>
+          <div class="smoke s2"></div>
+        </div>
+      </div>
+
+      <div class="integrity">
+        <div class="integrity-head">
+          <span>Integrità assetto</span>
+          <span>{{ team.integrity }}%</span>
+        </div>
+        <div class="bar">
+          <span style="--value: {{ team.integrity }}%;"></span>
+        </div>
+      </div>
+
+      <a class="ship-detail-link" href="{{ url_for('inspect_team', team_id=team.id) }}">Ispeziona team</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="module">
+  <div class="module-head">
+    <div>
+      <h2 class="module-title">Controllo moduli</h2>
+      <p class="module-mission">Abilita o disabilita i moduli per ciascun gruppo in base all’andamento dell’esercitazione.</p>
+    </div>
+    <div class="module-score">
+      <span>Team</span>
+      <strong>{{ teams|length }}</strong>
+    </div>
+  </div>
+
+  <div class="content module-admin-list">
+    {% for module in modules %}
+    <section class="mission-card">
+      <span>{{ module.type }}</span>
+      <strong>{{ module.title }}</strong>
+      <p class="module-mission">{{ module.mission }}</p>
+
+      <div class="admin-toggle-grid">
+        {% for team in teams %}
+        <form class="admin-toggle-card" method="post" action="{{ url_for('module_toggle') }}">
+          <input type="hidden" name="team_id" value="{{ team.id }}">
+          <input type="hidden" name="module_id" value="{{ module.id }}">
+
+          <div class="admin-toggle-head">
+            <strong>{{ team.name }}</strong>
+            <span class="{% if team.enabled_modules.get(module.id, false) %}is-on{% else %}is-off{% endif %}">
+              {% if team.enabled_modules.get(module.id, false) %}ON{% else %}OFF{% endif %}
+            </span>
+          </div>
+
+          <label class="switch-row">
+            <input type="checkbox" name="enabled" value="1" {% if team.enabled_modules.get(module.id, false) %}checked{% endif %}>
+            <span>Abilita modulo</span>
+          </label>
+
+          <button type="submit">Salva</button>
+        </form>
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

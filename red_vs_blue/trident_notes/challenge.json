@@ -2,5 +2,6 @@
     "name":"Trident Notes",
     "autors":"Davide Pio Posa",
     "description":"Un semplice registro interno per messaggi di servizio. Quando un contenuto resta salvato e viene visualizzato in seguito, anche i problemi possono diventare persistenti.",
+    "url":"http://www-thehackspace.hosting.uniba.it/trident_notes/",
     "flag":"SSCSS{stored_xss_commenti_non_sanitizzati}"
 }

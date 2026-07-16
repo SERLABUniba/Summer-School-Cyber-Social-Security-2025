@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+  <form class="auth-card" method="post" action="{{ url_for('login') }}">
+    <p class="eyebrow">Accesso</p>
+    <h2>Login dashboard</h2>
+    <p class="subtitle">Utenti previsti: admin + 4 gruppi nave.</p>
+    <label>Username<input type="text" name="username" required></label>
+    <label>Password<input type="password" name="password" required></label>
+    <button type="submit">Accedi</button>
+    <div class="hint-box"><strong>Credenziali demo</strong><p>admin / admin123! — gruppo1 / gruppo1 — gruppo2 / gruppo2 — gruppo3 / gruppo3 — gruppo4 / gruppo4</p></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Inspect {{ team.name }}{% endblock %}
+
+{% block content %}
+<section class="team-scoreboard">
+  <div class="scoreboard-head single-head">
+    <div>
+      <p class="eyebrow">Vista ispettiva</p>
+      <h2>{{ team.name }}</h2>
+      <p>{{ team.code }} · punteggio {{ team.score }} · moduli risolti {{ team.solved_count }}/{{ modules|length }}</p>
+    </div>
+  </div>
+
+  <div class="team-grid single-ship-grid">
+    <article class="ship-card" style="--accent: {{ team.accent }};">
+      <div class="ship-header">
+        <div>
+          <h2 class="team-name">{{ team.name }}</h2>
+          <div class="team-code">{{ team.code }}</div>
+        </div>
+        <div class="rank">{{ team.solved_count }}</div>
+      </div>
+
+      <div class="score-row">
+        <div class="score">{{ team.score }}</div>
+        <div class="score-label">punti<br>integrità {{ team.integrity }}%</div>
+      </div>
+
+      <div class="ship-wrap {% for c in team.damaged %}damage-{{ c }} {% endfor %}" aria-label="Nave {{ team.name }}">
+        <div class="sea"></div>
+        <div class="ship">
+          <div class="smoke s1"></div>
+          <div class="smoke s2"></div>
+          <div class="mast"></div>
+          <div class="sail sail-front"></div>
+          <div class="sail sail-main"></div>
+          <div class="bridge"></div>
+          <div class="radar"></div>
+          <div class="deck"></div>
+          <div class="hull"></div>
+          <div class="rudder"></div>
+          <div class="compass"></div>
+
+          <span class="component {% if 'radar' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="radar">RD</span>
+          <span class="component {% if 'compass' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="compass">BS</span>
+          <span class="component {% if 'rudder' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="rudder">TM</span>
+          <span class="component {% if 'sails' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="sails">CM</span>
+        </div>
+      </div>
+
+      <div class="integrity">
+        <div class="integrity-head">
+          <span>Integrità assetto</span>
+          <span>{{ team.integrity }}%</span>
+        </div>
+        <div class="bar">
+          <span style="--value: {{ team.integrity }}%;"></span>
+        </div>
+      </div>
+
+      <div class="domain-score-grid">
+        {% for module in modules %}
+        {% set enabled = team.enabled_modules.get(module.id, false) %}
+        {% set solved = module.id in team.solved_modules %}
+        <div class="domain-score {% if not enabled %}lost{% endif %}">
+          <span>{{ module.id|upper }}</span>
+          <strong>{% if solved %}OK{% elif enabled %}ON{% else %}OFF{% endif %}</strong>
+          <small>{{ module.challenge_title }}</small>
+        </div>
+        {% endfor %}
+      </div>
+    </article>
+  </div>
+
+  <div class="module">
+    <div class="module-head">
+      <div>
+        <h2 class="module-title">Stato moduli</h2>
+        <p class="module-mission">Dettaglio di abilitazione e completamento per il team selezionato.</p>
+      </div>
+      <div class="module-score">
+        <span>Integrità</span>
+        <strong>{{ team.integrity }}%</strong>
+      </div>
+    </div>
+
+    <div class="challenge-grid">
+      {% for module in modules %}
+      {% set enabled = team.enabled_modules.get(module.id, false) %}
+      {% set solved = module.id in team.solved_modules %}
+      <article class="challenge {% if solved %}solved{% endif %}">
+        <div class="challenge-head">
+          <div class="badge">{{ module.type }}</div>
+          <div class="challenge-title">{{ module.title }}</div>
+        </div>
+        <p class="challenge-brief">{{ module.mission }}</p>
+
+        <div class="tasks">
+          <strong>Stato operativo</strong>
+          <span>Modulo: {% if enabled %}abilitato{% else %}disabilitato{% endif %}</span>
+          <span>Completamento: {% if solved %}flag corretta registrata{% else %}non completato{% endif %}</span>
+          <span>Punteggio previsto: {{ module.points }}</span>
+        </div>
+
+        <div class="evidence">
+          <strong>Challenge</strong>
+          {% for ch in module.challenges %}
+          <span>{{ ch.id }} · {{ ch.title }}</span>
+          {% endfor %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

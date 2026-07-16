@@ -1,0 +1,15 @@
+services:
+  ctf-dashboard:
+    build: .
+    container_name: ctf-dashboard
+    ports:
+      - "8080:8080"
+    environment:
+      SECRET_KEY: "change-this-secret"
+    volumes:
+      - ./data:/app/data
+      - ../red_vs_blue:/opt/red_vs_blue
+    command: >
+      sh -c "python init_db.py &&
+             exec gunicorn -w 2 -b 0.0.0.0:8080 app:app"
+    restart: unless-stopped

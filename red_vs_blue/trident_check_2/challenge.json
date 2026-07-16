@@ -2,5 +2,6 @@
     "name":"Trident Internet Check - 2",
     "autors":"Davide Pio Posa",
     "description":"Console di diagnostica navale simulata per la verifica rapida dei nodi di bordo. Un piccolo errore nella gestione dell’input consente di alterare il comportamento del test, ma con qualche accortezza in più. La flag è contenuta in un file flag.txt",
+    "url":"http://www-thehackspace.hosting.uniba.it/trident_check_2/",
     "flag":"SSCSS{harbor_link_training_console_without_seeing}"
 }
