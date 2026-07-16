@@ -9,7 +9,17 @@ services:
     volumes:
       - ./data:/app/data
       - ../red_vs_blue:/opt/red_vs_blue
+      - ../css_mdo:/opt/css_mdo
     command: >
       sh -c "python init_db.py &&
-             exec gunicorn -w 2 -b 0.0.0.0:8080 app:app"
+             exec gunicorn app:app
+             --bind 0.0.0.0:8080
+             --worker-class gthread
+             --workers 2
+             --threads 4
+             --timeout 60
+             --graceful-timeout 20
+             --keep-alive 5
+             --max-requests 1000
+             --max-requests-jitter 100"
     restart: unless-stopped

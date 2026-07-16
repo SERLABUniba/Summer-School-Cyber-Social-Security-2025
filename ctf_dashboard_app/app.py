@@ -8,6 +8,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "app.db"
 RED_VS_BLUE_DIR = Path("/opt/red_vs_blue")
+CSS_MDO_FILE = Path("/opt/css_mdo/css_mdo.json")
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
@@ -231,8 +232,15 @@ def get_modules():
     modules = []
 
     for module in MODULES:
-        item = dict(module)
+        item = {**module}
         item["challenges"] = [dict(ch) for ch in module.get("challenges", [])]
+
+        if item["id"] == "m1":
+            dynamic_challenges = load_css_mdo_challenges()
+            if dynamic_challenges:
+                item["challenges"] = dynamic_challenges
+                item["challenge_title"] = "Cyber-Social Security MDO Dynamic Pack"
+                item["points"] = sum(ch.get("points", 0) for ch in dynamic_challenges) or item.get("points", 0)
 
         if item["id"] == "m3":
             dynamic_challenges = load_red_vs_blue_challenges()
@@ -243,6 +251,40 @@ def get_modules():
         modules.append(item)
 
     return modules
+
+def load_css_mdo_challenges():
+    challenges = []
+
+    if not CSS_MDO_FILE.exists() or not CSS_MDO_FILE.is_file():
+        return challenges
+
+    try:
+        raw_items = json.loads(CSS_MDO_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return challenges
+
+    if not isinstance(raw_items, list):
+        return challenges
+
+    for idx, item in enumerate(raw_items, start=1):
+        if not isinstance(item, dict):
+            continue
+
+        name = (item.get("name") or f"MDO Challenge {idx}").strip()
+        challenge_id = f"m1-{safe_challenge_id(name, str(idx))}"
+
+        challenges.append({
+            "id": challenge_id,
+            "title": name,
+            "authors": item.get("autors", ""),
+            "description": item.get("description", ""),
+            "url": item.get("url", ""),
+            "expected_flag": (item.get("flag") or "").strip(),
+            "type": "MDO",
+            "points": 100
+        })
+
+    return challenges
 
 
 def find_module(modules, module_id):
@@ -357,9 +399,14 @@ def inject_globals():
 
 @app.route("/")
 def home():
-    if "user" in session:
-        return redirect(url_for("dashboard"))
-    return redirect(url_for("login"))
+    teams = [build_team_view(team) for team in TEAMS]
+    teams.sort(key=lambda t: (-t["score"], -t["solved_count"], t["name"]))
+
+    return render_template(
+        "index.html",
+        teams=teams,
+        modules=get_modules(),
+    )
 
 
 @app.route("/login", methods=["GET", "POST"])

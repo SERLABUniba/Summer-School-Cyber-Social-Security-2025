@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Comando Marittimo Tirreno</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body class="public-page">
+  <header class="public-topbar">
+    <div>
+      <p class="eyebrow">Cyber-Social Security</p>
+      <h1>Comando Marittimo Tirreno</h1>
+      <p class="subtitle">
+        Stato pubblico dell’esercitazione CTF e monitoraggio delle unità navali.
+      </p>
+    </div>
+
+    <a class="public-login-button" href="{{ url_for('login') }}">
+      Accesso operativo
+    </a>
+  </header>
+
+  <main class="public-shell">
+    <section class="public-intro">
+      <div>
+        <p class="eyebrow">Situazione operativa</p>
+        <h2>Flotta in esercitazione</h2>
+        <p>
+          Risultato aggiornato delle quattro unità. I dettagli delle challenge,
+          i moduli attivi e le operazioni di flag submission sono disponibili
+          esclusivamente dopo l’autenticazione.
+        </p>
+      </div>
+
+      <div class="public-kpis" aria-label="Riepilogo esercitazione">
+        <article>
+          <span>Unità</span>
+          <strong>{{ teams|length }}</strong>
+        </article>
+
+        <article>
+          <span>Challenge risolte</span>
+          <strong>{{ teams|sum(attribute='solved_count') }}</strong>
+        </article>
+
+        <article>
+          <span>Moduli previsti</span>
+          <strong>{{ modules|length }}</strong>
+        </article>
+      </div>
+    </section>
+
+    <section class="public-fleet-section" aria-labelledby="fleet-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Scoreboard pubblico</p>
+          <h2 id="fleet-title">Navi, integrità e punteggio</h2>
+        </div>
+
+        <p>
+          Le card mostrano solo indicatori aggregati dell’esercitazione.
+        </p>
+      </div>
+
+      <div class="public-fleet-grid">
+        {% for team in teams %}
+        <article
+          class="ship-card public-ship-card {% if loop.index == 1 %}leader{% endif %}"
+          style="--accent: {{ team.accent }};"
+        >
+          <div class="ship-header">
+            <div>
+              <h3 class="team-name">{{ team.name }}</h3>
+              <div class="team-code">{{ team.code }}</div>
+            </div>
+
+            <div class="rank" aria-label="Posizione {{ loop.index }}">
+              {{ loop.index }}
+            </div>
+          </div>
+
+          <div class="score-row">
+            <div class="score">{{ team.score }}</div>
+            <div class="score-label">
+              punti<br>
+              {{ team.solved_count }} risolte
+            </div>
+          </div>
+
+          <div class="ship-wrap
+            {% if 'radar' in team.damaged %} damage-radar{% endif %}
+            {% if 'sails' in team.damaged %} damage-sails{% endif %}
+            {% if 'compass' in team.damaged %} damage-compass{% endif %}
+            {% if 'rudder' in team.damaged %} damage-rudder{% endif %}
+          ">
+            <div class="sea"></div>
+
+            <div class="ship" aria-label="Stato della nave {{ team.name }}">
+              <div class="hull"></div>
+              <div class="deck"></div>
+              <div class="bridge"></div>
+              <div class="mast"></div>
+              <div class="sail sail-main"></div>
+              <div class="sail sail-front"></div>
+              <div class="radar"></div>
+              <div class="compass"></div>
+              <div class="rudder"></div>
+
+              <div
+                class="component {% if 'radar' in team.damaged %}damaged{% else %}ok{% endif %}"
+                data-component="radar"
+                title="Radar"
+              >RD</div>
+
+              <div
+                class="component {% if 'sails' in team.damaged %}damaged{% else %}ok{% endif %}"
+                data-component="sails"
+                title="Comunicazioni"
+              >CM</div>
+
+              <div
+                class="component {% if 'compass' in team.damaged %}damaged{% else %}ok{% endif %}"
+                data-component="compass"
+                title="Bussola"
+              >BS</div>
+
+              <div
+                class="component {% if 'rudder' in team.damaged %}damaged{% else %}ok{% endif %}"
+                data-component="rudder"
+                title="Timone"
+              >TM</div>
+
+              <div class="smoke s1"></div>
+              <div class="smoke s2"></div>
+            </div>
+          </div>
+
+          <div class="integrity">
+            <div class="integrity-head">
+              <span>Integrità assetto</span>
+              <span>{{ team.integrity }}%</span>
+            </div>
+
+            <div class="bar">
+              <span style="--value: {{ team.integrity }}%;"></span>
+            </div>
+          </div>
+
+          <div class="public-ship-status">
+            {% if team.damaged %}
+              <span class="public-status-label">Asset compromessi</span>
+              <p>
+                {% for asset in team.damaged %}
+                  {{ asset }}{% if not loop.last %} · {% endif %}
+                {% endfor %}
+              </p>
+            {% else %}
+              <span class="public-status-label safe">Stato asset</span>
+              <p>Nessun asset compromesso</p>
+            {% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="public-modules" aria-labelledby="modules-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Scenario esercitativo</p>
+          <h2 id="modules-title">Domini operativi</h2>
+        </div>
+
+        <p>
+          I contenuti, i link delle challenge e l’invio delle flag sono riservati
+          ai gruppi autorizzati.
+        </p>
+      </div>
+
+      <div class="public-module-grid">
+        {% for module in modules %}
+        <article class="public-module-card">
+          <span class="public-module-type">{{ module.type }}</span>
+          <h3>{{ module.title }}</h3>
+          <p>{{ module.mission }}</p>
+          <span class="public-module-lock">Accesso riservato</span>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+
+
+    <footer class="site-footer team-site-footer" aria-label="Cyber-Social Security">
+  <div class="team-footer-inner">
+    <img
+      class="footer-banner"
+      src="https://vitabarl.github.io/trident-shield-ctf/assets/logos/banner_CTF.png"
+      alt="UniBa SERLAB SER&P CrASte"
+      loading="lazy"
+    >
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,38 @@
+[
+    {
+        "name":"CSS-MDO Operazione Blackout Ibrido - ALFA",
+        "autors":"Samuele del vescovo",
+        "description":"Operazione di Natura Ibrida sfruttanti vettori Cyber-Social di attacco in Scenari Multi-Dominio - Estratto log SOC (Nordenegro)",
+        "url":"http://www-thehackspace.hosting.uniba.it/css_mdo/md5",
+        "flag":"SSCSS{cyber_infrastrutturacritica_killdisk}"
+    },
+    {
+        "name":"CSS-MDO Operazione Blackout Ibrido - BRAVO",
+        "autors":"Samuele del vescovo",
+        "description":"Operazione di Natura Ibrida sfruttanti vettori Cyber-Social di attacco in Scenari Multi-Dominio - Monitoraggio Social Media",
+        "url":"http://www-thehackspace.hosting.uniba.it/css_mdo/md5",
+        "flag":"SSCSS{informativo_persone_fakenews}"
+    },
+    {
+        "name":"CSS-MDO Operazione Blackout Ibrido - CHARLIE",
+        "autors":"Samuele del vescovo",
+        "description":"Operazione di Natura Ibrida sfruttanti vettori Cyber-Social di attacco in Scenari Multi-Dominio - Immagini Satellitari",
+        "url":"http://www-thehackspace.hosting.uniba.it/css_mdo/md5",
+        "flag":"SSCSS{fisico_infrastrutturacritica_comandoremoto}"
+    },
+    {
+        "name":"CSS-MDO Operazione Blackout Ibrido - DELTA",
+        "autors":"Samuele del vescovo",
+        "description":"Operazione di Natura Ibrida sfruttanti vettori Cyber-Social di attacco in Scenari Multi-Dominio - Report Humint",
+        "url":"http://www-thehackspace.hosting.uniba.it/css_mdo/md5",
+        "flag":"SSCSS{cyberfisico_remoto}"
+    },
+    {
+        "name":"CSS-MDO Operazione Blackout Ibrido - ECHO",
+        "autors":"Samuele del vescovo",
+        "description":"Operazione di Natura Ibrida sfruttanti vettori Cyber-Social di attacco in Scenari Multi-Dominio - Scambio Email",
+        "url":"http://www-thehackspace.hosting.uniba.it/css_mdo/md5",
+        "flag":"SSCSS{cognitivo_sfiducia}"
+    }   
+
+]
