@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Comando Marittimo Tirreno</title>
+  <title>Operazione TRIDENT SHIELD</title>
 
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -13,10 +13,7 @@
   <header class="public-topbar">
     <div>
       <p class="eyebrow">Cyber-Social Security</p>
-      <h1>Comando Marittimo Tirreno</h1>
-      <p class="subtitle">
-        Stato pubblico dell’esercitazione CTF e monitoraggio delle unità navali.
-      </p>
+      <h1>Operazione TRIDENT SHIELD</h1>
     </div>
 
     <a class="public-login-button" href="{{ url_for('login') }}">
@@ -27,12 +24,11 @@
   <main class="public-shell">
     <section class="public-intro">
       <div>
-        <p class="eyebrow">Situazione operativa</p>
-        <h2>Flotta in esercitazione</h2>
+        <p class="eyebrow">Situazione</p>
+        <h2>TRIDENT SHIELD Operativa</h2>
         <p>
-          Risultato aggiornato delle quattro unità. I dettagli delle challenge,
-          i moduli attivi e le operazioni di flag submission sono disponibili
-          esclusivamente dopo l’autenticazione.
+          Risultato aggiornato delle quattro unità.
+          In TRIDENT SHIELD, le componenti di bordo rappresentano gli effetti operativi della Cyber-Social Security nei domini cyber, informativo, cognitivo e fisico: il <strong>radar</strong> rappresenta la capacità di rilevare minacce e segnali nel dominio cyber; le <strong>comunicazioni</strong> rappresentano l’integrità del dominio informativo; la <strong>bussola</strong> rappresenta l’affidabilità del dominio cognitivo e del processo decisionale; il <strong>timone</strong> rappresenta la continuità d’azione nel dominio fisico-operativo.
         </p>
       </div>
 
@@ -60,10 +56,6 @@
           <p class="eyebrow">Scoreboard pubblico</p>
           <h2 id="fleet-title">Navi, integrità e punteggio</h2>
         </div>
-
-        <p>
-          Le card mostrano solo indicatori aggregati dell’esercitazione.
-        </p>
       </div>
 
       <div class="public-fleet-grid">
@@ -150,18 +142,30 @@
             </div>
           </div>
 
-          <div class="public-ship-status">
-            {% if team.damaged %}
-              <span class="public-status-label">Asset compromessi</span>
-              <p>
-                {% for asset in team.damaged %}
-                  {{ asset }}{% if not loop.last %} · {% endif %}
-                {% endfor %}
-              </p>
-            {% else %}
-              <span class="public-status-label safe">Stato asset</span>
-              <p>Nessun asset compromesso</p>
-            {% endif %}
+          <div class="domain-score-grid component-domain-grid">
+            <div class="domain-score {% if 'radar' in team.damaged %}lost{% endif %}">
+              <span>Cyber</span>
+              <strong>{% if 'radar' in team.damaged %}0{% else %}1{% endif %}</strong>
+              <small>{% if 'radar' in team.damaged %}Radar perso{% else %}Radar operativo{% endif %}</small>
+            </div>
+
+            <div class="domain-score {% if 'sails' in team.damaged %}lost{% endif %}">
+              <span>Information</span>
+              <strong>{% if 'sails' in team.damaged %}0{% else %}1{% endif %}</strong>
+              <small>{% if 'sails' in team.damaged %}Comunicazioni perse{% else %}Comunicazioni attive{% endif %}</small>
+            </div>
+
+            <div class="domain-score {% if 'compass' in team.damaged %}lost{% endif %}">
+              <span>Cognitive</span>
+              <strong>{% if 'compass' in team.damaged %}0{% else %}1{% endif %}</strong>
+              <small>{% if 'compass' in team.damaged %}Bussola persa{% else %}Bussola operativa{% endif %}</small>
+            </div>
+
+            <div class="domain-score {% if 'rudder' in team.damaged %}lost{% endif %}">
+              <span>Physical</span>
+              <strong>{% if 'rudder' in team.damaged %}0{% else %}1{% endif %}</strong>
+              <small>{% if 'rudder' in team.damaged %}Timone perso{% else %}Timone operativo{% endif %}</small>
+            </div>
           </div>
         </article>
         {% endfor %}
@@ -194,16 +198,15 @@
     </section>
   </main>
 
-
-    <footer class="site-footer team-site-footer" aria-label="Cyber-Social Security">
-  <div class="team-footer-inner">
-    <img
-      class="footer-banner"
-      src="https://vitabarl.github.io/trident-shield-ctf/assets/logos/banner_CTF.png"
-      alt="UniBa SERLAB SER&P CrASte"
-      loading="lazy"
-    >
-  </div>
-</footer>
+  <footer class="site-footer team-site-footer" aria-label="Cyber-Social Security">
+    <div class="team-footer-inner">
+      <img
+        class="footer-banner"
+        src="https://vitabarl.github.io/trident-shield-ctf/assets/logos/banner_CTF.png"
+        alt="UniBa SERLAB SER&P CrASte"
+        loading="lazy"
+      >
+    </div>
+  </footer>
 </body>
 </html>

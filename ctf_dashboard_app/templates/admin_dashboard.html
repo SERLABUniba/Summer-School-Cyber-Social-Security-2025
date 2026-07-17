@@ -89,11 +89,30 @@
       </div>
     </div>
 
-    <div class="tasks admin-summary">
-      <strong>Stato generale</strong>
-      <span>Challenge completate: {{ team.solved_count }}</span>
-      <span>Moduli attivi: {{ team.enabled_modules.values()|select|list|length }}</span>
-      <span>Moduli risolti: {{ team.solved_modules|length }}</span>
+    <div class="domain-score-grid component-domain-grid">
+      <div class="domain-score {% if 'radar' in team.damaged %}lost{% endif %}">
+        <span>Cyber</span>
+        <strong>{% if 'radar' in team.damaged %}0{% else %}1{% endif %}</strong>
+        <small>{% if 'radar' in team.damaged %}Radar perso{% else %}Radar operativo{% endif %}</small>
+      </div>
+
+      <div class="domain-score {% if 'sails' in team.damaged %}lost{% endif %}">
+        <span>Information</span>
+        <strong>{% if 'sails' in team.damaged %}0{% else %}1{% endif %}</strong>
+        <small>{% if 'sails' in team.damaged %}Comunicazioni perse{% else %}Comunicazioni attive{% endif %}</small>
+      </div>
+
+      <div class="domain-score {% if 'compass' in team.damaged %}lost{% endif %}">
+        <span>Cognitive</span>
+        <strong>{% if 'compass' in team.damaged %}0{% else %}1{% endif %}</strong>
+        <small>{% if 'compass' in team.damaged %}Bussola persa{% else %}Bussola operativa{% endif %}</small>
+      </div>
+
+      <div class="domain-score {% if 'rudder' in team.damaged %}lost{% endif %}">
+        <span>Physical</span>
+        <strong>{% if 'rudder' in team.damaged %}0{% else %}1{% endif %}</strong>
+        <small>{% if 'rudder' in team.damaged %}Timone perso{% else %}Timone operativo{% endif %}</small>
+      </div>
     </div>
 
     {% set losses = team.module_progress | selectattr('closed') | list %}

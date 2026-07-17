@@ -1531,3 +1531,164 @@
     min-height: 52px;
   }
 }
+
+.domain-score {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.domain-score span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.domain-score strong {
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--green);
+}
+
+.domain-score small {
+  color: var(--green);
+  font-size: 0.72rem;
+}
+
+.domain-score.lost strong,
+.domain-score.lost small {
+  color: var(--red);
+}
+
+.domain-score.lost {
+  border-color: rgba(239, 109, 109, 0.28);
+  background: rgba(239, 109, 109, 0.08);
+}
+
+.component-domain-grid {
+  position: relative;
+  z-index: 1;
+  padding: 0 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.component-domain-grid .domain-score {
+  min-height: 92px;
+  align-content: start;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.component-domain-grid .domain-score span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.component-domain-grid .domain-score strong {
+  color: var(--green);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.component-domain-grid .domain-score small {
+  color: var(--green);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.component-domain-grid .domain-score.lost {
+  border-color: rgba(239, 109, 109, 0.34);
+  background: rgba(239, 109, 109, 0.08);
+}
+
+.component-domain-grid .domain-score.lost strong,
+.component-domain-grid .domain-score.lost small {
+  color: var(--red);
+}
+
+.component-domain-grid {
+  position: relative;
+  z-index: 1;
+  padding: 0 16px 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.component-domain-grid .domain-score {
+  min-height: 92px;
+  align-content: start;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.component-domain-grid .domain-score span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.component-domain-grid .domain-score strong {
+  color: var(--green);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.component-domain-grid .domain-score small {
+  color: var(--green);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.component-domain-grid .domain-score.lost {
+  border-color: rgba(239, 109, 109, 0.34);
+  background: rgba(239, 109, 109, 0.08);
+}
+
+.component-domain-grid .domain-score.lost strong,
+.component-domain-grid .domain-score.lost small {
+  color: var(--red);
+}
+
+.login-actions-secondary {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.secondary-nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(99, 214, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.secondary-nav-button:hover {
+  background: rgba(99, 214, 255, 0.1);
+  border-color: rgba(99, 214, 255, 0.4);
+}

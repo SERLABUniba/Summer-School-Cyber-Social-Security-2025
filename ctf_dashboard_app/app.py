@@ -23,21 +23,51 @@ TEAMS = [
     {"id": "vespucci", "name": "Vespucci", "code": "Vespucci", "accent": "#ff7d9b"},
 ]
 
-SHIP_COMPONENT_ORDER = ["radar", "sails", "compass", "rudder"]
+SHIP_COMPONENT_ORDER = ["Radar", "Comunicazioni", "Bussola", "Timone"]
 
 SHIP_COMPONENT_META = {
-    "radar": {"label": "Radar", "mark": "RD"},
-    "sails": {"label": "Comunicazioni", "mark": "CM"},
-    "compass": {"label": "Bussola", "mark": "BS"},
-    "rudder": {"label": "Timone", "mark": "TM"},
+    "Radar": {"label": "Radar", "mark": "RD"},
+    "Comunicazioni": {"label": "Comunicazioni", "mark": "CM"},
+    "Bussola": {"label": "Bussola", "mark": "BS"},
+    "Timone": {"label": "Timone", "mark": "TM"},
 }
 
 USERS = [
-    {"username": "admin", "password": "admin123!", "role": "admin", "team_id": None, "display_name": "Direzione CTF"},
-    {"username": "gruppo1", "password": "gruppo1", "role": "team", "team_id": "cavour", "display_name": "Gruppo Nave 1"},
-    {"username": "gruppo2", "password": "gruppo2", "role": "team", "team_id": "garibaldi", "display_name": "Gruppo Nave 2"},
-    {"username": "gruppo3", "password": "gruppo3", "role": "team", "team_id": "trieste", "display_name": "Gruppo Nave 3"},
-    {"username": "gruppo4", "password": "gruppo4", "role": "team", "team_id": "vespucci", "display_name": "Gruppo Nave 4"},
+    {
+        "username": "admin",
+        "password": "VitaBarchetta",
+        "role": "admin",
+        "team_id": None,
+        "display_name": "Comando Operativo"
+    },
+    {
+        "username": "nave_cavour",
+        "password": "C4v0ur",
+        "role": "team",
+        "team_id": "cavour",
+        "display_name": "Unità Cavour"
+    },
+    {
+        "username": "nave_garibaldi",
+        "password": "G4r1b4ld1",
+        "role": "team",
+        "team_id": "garibaldi",
+        "display_name": "Unità Garibaldi"
+    },
+    {
+        "username": "nave_trieste",
+        "password": "Tri3st3",
+        "role": "team",
+        "team_id": "trieste",
+        "display_name": "Unità Trieste"
+    },
+    {
+        "username": "nave_vespucci",
+        "password": "V3spucc1",
+        "role": "team",
+        "team_id": "vespucci",
+        "display_name": "Unità Vespucci"
+    },
 ]
 
 MODULES = [
@@ -120,13 +150,20 @@ MODULES = [
     },
     {
         "id": "final",
-        "title": "Grande CTF Finale",
-        "mission": "Usare simultaneamente CTI, malware analysis, OSINT, decision making, AI, Cyber-Social Security e MDO.",
+        "title": "Modalità critica",
+        "mission": "Accesso al portale operativo esterno per la fase critica dell’esercitazione.",
         "type": "FINAL",
-        "challenge_title": "Blue Team Recovery Operations",
+        "challenge_title": "Modalità critica",
         "points": 250,
         "challenges": [
-            {"id": "final-c1", "title": "Blue Team Recovery Operations", "expected_flag": "FLAG{FINAL_BRO}", "points": 250},
+            {
+                "id": "final-c1",
+                "title": "Modalità critica",
+                "description": "Apri il portale operativo dedicato alla fase critica.",
+                "url": "https://vitabarl.github.io/trident-shield-ctf/index.html",
+                "expected_flag": "FLAG{HARD_MODE}",
+                "points": 250,
+            },
         ],
     },
 ]

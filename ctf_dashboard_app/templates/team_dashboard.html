@@ -71,47 +71,35 @@
       </div>
     </div>
 
-    <div class="tasks admin-summary">
-      <strong>Stato operativo</strong>
-      <span>Challenge completate: {{ team.solved_challenges|length }}</span>
-      <span>Moduli attivi: {{ team.enabled_modules.values()|select|list|length }}</span>
-      <span>Moduli risolti: {{ team.solved_modules|length }}</span>
+<div class="domain-score-grid component-domain-grid">
+    <div class="domain-score {% if 'radar' in team.damaged %}lost{% endif %}">
+        <span>Cyber</span>
+        <strong>{% if 'radar' in team.damaged %}0{% else %}1{% endif %}</strong>
+        <small>{% if 'radar' in team.damaged %}Radar perso{% else %}Radar operativo{% endif %}</small>
     </div>
+
+    <div class="domain-score {% if 'sails' in team.damaged %}lost{% endif %}">
+        <span>Information</span>
+        <strong>{% if 'sails' in team.damaged %}0{% else %}1{% endif %}</strong>
+        <small>{% if 'sails' in team.damaged %}Comunicazioni perse{% else %}Comunicazioni attive{% endif %}</small>
+    </div>
+
+    <div class="domain-score {% if 'compass' in team.damaged %}lost{% endif %}">
+        <span>Cognitive</span>
+        <strong>{% if 'compass' in team.damaged %}0{% else %}1{% endif %}</strong>
+        <small>{% if 'compass' in team.damaged %}Bussola persa{% else %}Bussola operativa{% endif %}</small>
+    </div>
+
+    <div class="domain-score {% if 'rudder' in team.damaged %}lost{% endif %}">
+        <span>Physical</span>
+        <strong>{% if 'rudder' in team.damaged %}0{% else %}1{% endif %}</strong>
+        <small>{% if 'rudder' in team.damaged %}Timone perso{% else %}Timone operativo{% endif %}</small>
+    </div>
+</div>
   </article>
 </section>
 
-{% if team.module_progress %}
-<section class="panel">
-  <div class="panel-heading">
-    <h3>Integrità operativa</h3>
-    <p>Le penalità vengono consolidate quando un modulo viene chiuso con challenge incomplete.</p>
-  </div>
 
-  <div class="module-integrity-list">
-    {% for item in team.module_progress %}
-    <article class="module-integrity-card">
-      <div>
-        <strong>{{ item.title }}</strong>
-        <p>{{ item.solved_count }}/{{ item.total_count }} challenge completate</p>
-      </div>
-
-      <div class="module-integrity-meta">
-        {% if item.closed %}
-          <span class="status-chip status-ko">-{{ item.penalty_percent }}% integrità</span>
-          <small>{{ item.missed_challenges }} challenge mancanti alla chiusura</small>
-        {% elif item.enabled %}
-          <span class="status-chip status-live">Attivo</span>
-          <small>Ancora in corso, nessuna penalità consolidata</small>
-        {% else %}
-          <span class="status-chip status-idle">Non attivo</span>
-          <small>Modulo non ancora avviato</small>
-        {% endif %}
-      </div>
-    </article>
-    {% endfor %}
-  </div>
-</section>
-{% endif %}
 
 <div class="module-stack">
   {% for module in modules %}
