@@ -1,15 +1,69 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block title %}Login{% endblock %}
+
 {% block content %}
-<section class="auth-wrap">
-  <form class="auth-card" method="post" action="{{ url_for('login') }}">
-    <p class="eyebrow">Accesso</p>
-    <h2>Login dashboard</h2>
-    <p class="subtitle">Utenti previsti: admin + 4 gruppi nave.</p>
-    <label>Username<input type="text" name="username" required></label>
-    <label>Password<input type="password" name="password" required></label>
-    <button type="submit">Accedi</button>
-    <div class="hint-box"><strong>Credenziali demo</strong><p>admin / admin123! — gruppo1 / gruppo1 — gruppo2 / gruppo2 — gruppo3 / gruppo3 — gruppo4 / gruppo4</p></div>
-  </form>
+<section class="login-shell">
+  <div class="login-hero">
+    <div class="scoreboard-head single-head">
+      <div>
+        <p class="eyebrow">Accesso</p>
+        <h2>Login dashboard</h2>
+        <p>Ingresso riservato ai gruppi autorizzati e alla direzione operativa dell’esercitazione.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-layout" style="margin-top: 18px;">
+    <article class="login-panel">
+      <div class="login-kicker">Area riservata</div>
+      <div class="login-side-inner">
+        <h3>Autenticazione operativa</h3>
+        <p>Inserisci le credenziali assegnate per accedere al pannello di missione.</p>
+
+        <form class="login-form" method="post">
+          <label class="flag-label">
+            <span>Username</span>
+            <input type="text" name="username" autocomplete="username" placeholder="Inserisci username" required>
+          </label>
+
+          <label class="flag-label">
+            <span>Password</span>
+            <input type="password" name="password" autocomplete="current-password" placeholder="Inserisci password" required>
+          </label>
+
+          <button type="submit">Accedi</button>
+        </form>
+      </div>
+    </article>
+
+    <aside class="login-side-panel">
+      <div class="login-side-inner">
+        <div class="login-kicker">Portale CTF</div>
+        <h3>Accesso protetto</h3>
+        <p>Il pannello consente la gestione dei moduli, l’invio delle flag e il monitoraggio operativo delle squadre.</p>
+
+        <div class="login-meta-list">
+          <div class="login-meta-item">
+            <strong>Utenti previsti</strong>
+            <span>Amministrazione e gruppi nave autorizzati.</span>
+          </div>
+
+          <div class="login-meta-item">
+            <strong>Ambiente</strong>
+            <span>Dashboard dark con accesso riservato all’esercitazione.</span>
+          </div>
+
+          <div class="login-meta-item">
+            <strong>Sicurezza</strong>
+            <span>Usa solo le credenziali assegnate dal personale amministrativo.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-note">
+        Le credenziali demo non dovrebbero essere esposte pubblicamente nella pagina di accesso.
+      </div>
+    </aside>
+  </div>
 </section>
 {% endblock %}

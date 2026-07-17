@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Dashboard {{ team.name }}{% endblock %}
 
-{% block content %}
+{% block page_header %}
 <section class="team-scoreboard">
   <div class="scoreboard-head single-head">
     <div>
@@ -10,73 +10,108 @@
       <p>{{ team.code }} · punteggio {{ team.score }} · challenge risolte {{ team.solved_count }}</p>
     </div>
   </div>
+</section>
+{% endblock %}
 
-  <div class="team-grid single-ship-grid">
-    <article class="ship-card admin-team-card active-team" style="--accent: {{ team.accent }};">
-      <div class="ship-header">
-        <div>
-          <h2 class="team-name">{{ team.name }}</h2>
-          <div class="team-code">{{ team.code }}</div>
-        </div>
-        <div class="rank">{{ team.solved_count }}</div>
+{% block content %}
+<section class="team-grid single-ship-grid">
+  <article class="ship-card admin-team-card active-team" style="--accent: {{ team.accent }};">
+    <div class="ship-header">
+      <div>
+        <h2 class="team-name">{{ team.name }}</h2>
+        <div class="team-code">{{ team.code }}</div>
+      </div>
+      <div class="rank">{{ team.solved_count }}</div>
+    </div>
+
+    <div class="score-row">
+      <div class="score">{{ team.score }}</div>
+      <div class="score-label">
+        punti<br>
+        integrità {{ team.integrity }}%
+      </div>
+    </div>
+
+    <div class="ship-wrap
+      {% if 'radar' in team.damaged %} damage-radar{% endif %}
+      {% if 'sails' in team.damaged %} damage-sails{% endif %}
+      {% if 'compass' in team.damaged %} damage-compass{% endif %}
+      {% if 'rudder' in team.damaged %} damage-rudder{% endif %}
+    ">
+      <div class="sea"></div>
+
+      <div class="ship">
+        <div class="hull"></div>
+        <div class="deck"></div>
+        <div class="bridge"></div>
+        <div class="mast"></div>
+        <div class="sail sail-main"></div>
+        <div class="sail sail-front"></div>
+        <div class="radar"></div>
+        <div class="compass"></div>
+        <div class="rudder"></div>
+
+        <div class="component {% if 'radar' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="radar">RD</div>
+        <div class="component {% if 'sails' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="sails">CM</div>
+        <div class="component {% if 'compass' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="compass">BS</div>
+        <div class="component {% if 'rudder' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="rudder">TM</div>
+
+        <div class="smoke s1"></div>
+        <div class="smoke s2"></div>
+      </div>
+    </div>
+
+    <div class="integrity">
+      <div class="integrity-head">
+        <span>Integrità assetto</span>
+        <span>{{ team.integrity }}%</span>
+      </div>
+      <div class="bar">
+        <span style="--value: {{ team.integrity }}%;"></span>
+      </div>
+    </div>
+
+    <div class="tasks admin-summary">
+      <strong>Stato operativo</strong>
+      <span>Challenge completate: {{ team.solved_challenges|length }}</span>
+      <span>Moduli attivi: {{ team.enabled_modules.values()|select|list|length }}</span>
+      <span>Moduli risolti: {{ team.solved_modules|length }}</span>
+    </div>
+  </article>
+</section>
+
+{% if team.module_progress %}
+<section class="panel">
+  <div class="panel-heading">
+    <h3>Integrità operativa</h3>
+    <p>Le penalità vengono consolidate quando un modulo viene chiuso con challenge incomplete.</p>
+  </div>
+
+  <div class="module-integrity-list">
+    {% for item in team.module_progress %}
+    <article class="module-integrity-card">
+      <div>
+        <strong>{{ item.title }}</strong>
+        <p>{{ item.solved_count }}/{{ item.total_count }} challenge completate</p>
       </div>
 
-      <div class="score-row">
-        <div class="score">{{ team.score }}</div>
-        <div class="score-label">
-          punti<br>
-          integrità {{ team.integrity }}%
-        </div>
-      </div>
-
-      <div class="ship-wrap
-        {% if 'radar' in team.damaged %} damage-radar{% endif %}
-        {% if 'sails' in team.damaged %} damage-sails{% endif %}
-        {% if 'compass' in team.damaged %} damage-compass{% endif %}
-        {% if 'rudder' in team.damaged %} damage-rudder{% endif %}
-      ">
-        <div class="sea"></div>
-
-        <div class="ship">
-          <div class="hull"></div>
-          <div class="deck"></div>
-          <div class="bridge"></div>
-          <div class="mast"></div>
-          <div class="sail sail-main"></div>
-          <div class="sail sail-front"></div>
-          <div class="radar"></div>
-          <div class="compass"></div>
-          <div class="rudder"></div>
-
-          <div class="component {% if 'radar' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="radar">RD</div>
-          <div class="component {% if 'sails' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="sails">CM</div>
-          <div class="component {% if 'compass' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="compass">BS</div>
-          <div class="component {% if 'rudder' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="rudder">TM</div>
-
-          <div class="smoke s1"></div>
-          <div class="smoke s2"></div>
-        </div>
-      </div>
-
-      <div class="integrity">
-        <div class="integrity-head">
-          <span>Integrità assetto</span>
-          <span>{{ team.integrity }}%</span>
-        </div>
-        <div class="bar">
-          <span style="--value: {{ team.integrity }}%;"></span>
-        </div>
-      </div>
-
-      <div class="tasks admin-summary">
-        <strong>Stato operativo</strong>
-        <span>Challenge completate: {{ team.solved_challenges|length }}</span>
-        <span>Moduli attivi: {{ team.enabled_modules.values()|select|list|length }}</span>
-        <span>Moduli risolti: {{ team.solved_modules|length }}</span>
+      <div class="module-integrity-meta">
+        {% if item.closed %}
+          <span class="status-chip status-ko">-{{ item.penalty_percent }}% integrità</span>
+          <small>{{ item.missed_challenges }} challenge mancanti alla chiusura</small>
+        {% elif item.enabled %}
+          <span class="status-chip status-live">Attivo</span>
+          <small>Ancora in corso, nessuna penalità consolidata</small>
+        {% else %}
+          <span class="status-chip status-idle">Non attivo</span>
+          <small>Modulo non ancora avviato</small>
+        {% endif %}
       </div>
     </article>
+    {% endfor %}
   </div>
 </section>
+{% endif %}
 
 <div class="module-stack">
   {% for module in modules %}
@@ -92,78 +127,80 @@
       </div>
     </div>
 
-  <div class="challenge-grid challenge-grid-pretty">
-    {% for challenge in module.challenges %}
-    {% set solved = (module.id, challenge.id) in team.solved_challenges %}
-    {% set enabled = team.enabled_modules.get(module.id, false) %}
+    <div class="challenge-grid challenge-grid-pretty">
+      {% for challenge in module.challenges %}
+      {% set solved = (module.id, challenge.id) in team.solved_challenges %}
+      {% set enabled = team.enabled_modules.get(module.id, false) %}
 
-    <article class="challenge challenge-card {% if solved %}solved{% endif %} {% if not enabled %}locked{% endif %}">
-      <div class="challenge-card-top">
-        <div class="challenge-head">
-          <div class="badge">{{ challenge.type or module.type }}</div>
-          <div class="challenge-title">{{ challenge.title }}</div>
+      <article class="challenge challenge-card {% if solved %}solved{% endif %} {% if not enabled %}locked{% endif %}">
+        <div class="challenge-card-top">
+          <div class="challenge-head">
+            <div class="badge">{{ challenge.type or module.type }}</div>
+            <div class="challenge-title">{{ challenge.title }}</div>
+          </div>
+
+          {% if not enabled %}
+            <div class="challenge-status">Non abilitato</div>
+          {% elif solved %}
+            <div class="challenge-status challenge-status-ok">Completata</div>
+          {% else %}
+            <div class="challenge-status">Attiva</div>
+          {% endif %}
         </div>
 
-        {% if not enabled %}
-        <div class="challenge-status">Non abilitato</div>
-        {% elif solved %}
-        <div class="challenge-status challenge-status-ok">Completata</div>
+        {% if enabled %}
+          {% if challenge.authors %}
+          <div class="challenge-meta">
+            <strong>Autori</strong>
+            <span>{{ challenge.authors }}</span>
+          </div>
+          {% endif %}
+
+          <p class="challenge-brief">{{ challenge.description }}</p>
+
+          {% if challenge.url %}
+          <div class="artifact-list">
+            <strong>URL challenge</strong>
+            <a href="{{ challenge.url }}" target="_blank" rel="noopener noreferrer">Apri challenge</a>
+          </div>
+          {% endif %}
+
+          <div class="tasks">
+            <strong>Dettagli</strong>
+            <span>ID: {{ challenge.id }}</span>
+            <span>Punti: {{ challenge.points }}</span>
+            <span>{% if solved %}Flag già validata{% else %}Pronta per submission{% endif %}</span>
+          </div>
+
+          <div class="challenge-footer">
+            <form class="flag-form flag-form-inline" method="post" action="{{ url_for('submit_flag') }}">
+              <input type="hidden" name="module_id" value="{{ module.id }}">
+              <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+
+              <label class="flag-label">
+                <span>Flag</span>
+                <input
+                  type="text"
+                  name="submitted_flag"
+                  placeholder="Inserisci la flag"
+                  {% if solved %}value="FLAG VALIDATA" readonly{% endif %}
+                >
+              </label>
+
+              <button type="submit" {% if solved %}disabled{% endif %}>
+                {% if solved %}Bloccata{% else %}Invia{% endif %}
+              </button>
+            </form>
+          </div>
+        {% else %}
+          <div class="challenge-locked-message">
+            <p class="feedback bad">Non abilitato.</p>
+          </div>
         {% endif %}
-      </div>
-
-      {% if enabled %}
-        {% if challenge.authors %}
-        <div class="challenge-meta">
-          <strong>Autori</strong>
-          <span>{{ challenge.authors }}</span>
-        </div>
-        {% endif %}
-
-        <p class="challenge-brief">{{ challenge.description }}</p>
-
-        {% if challenge.url %}
-        <div class="artifact-list">
-          <strong>URL challenge</strong>
-          <a href="{{ challenge.url }}" target="_blank" rel="noopener noreferrer">Apri challenge</a>
-        </div>
-        {% endif %}
-
-        <div class="tasks">
-          <strong>Dettagli</strong>
-          <span>ID: {{ challenge.id }}</span>
-          <span>Punti: {{ challenge.points }}</span>
-          <span>{% if solved %}Flag già validata{% else %}Pronta per submission{% endif %}</span>
-        </div>
-
-        <div class="challenge-footer">
-          <form class="flag-form flag-form-inline" method="post" action="{{ url_for('submit_flag') }}">
-            <input type="hidden" name="module_id" value="{{ module.id }}">
-            <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
-
-            <label class="flag-label">
-              <span>Flag</span>
-              <input
-                type="text"
-                name="submitted_flag"
-                placeholder="Inserisci la flag"
-                {% if solved %}value="FLAG VALIDATA" readonly{% endif %}
-              >
-            </label>
-
-            <button type="submit" {% if solved %}disabled{% endif %}>
-              {% if solved %}Bloccata{% else %}Invia{% endif %}
-            </button>
-          </form>
-        </div>
-      {% else %}
-        <div class="challenge-locked-message">
-          <p class="feedback bad">Non abilitato.</p>
-        </div>
-      {% endif %}
-    </article>
-    {% endfor %}
-  </div>
+      </article>
+      {% endfor %}
+    </div>
   </section>
   {% endfor %}
 </div>
-{% endblock %} 
+{% endblock %}

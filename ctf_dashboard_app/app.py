@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, send_file
+from datetime import datetime
+import shutil
 import sqlite3
 import os
 import json
@@ -9,6 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "app.db"
 RED_VS_BLUE_DIR = Path("/opt/red_vs_blue")
 CSS_MDO_FILE = Path("/opt/css_mdo/css_mdo.json")
+BACKUP_DIR = BASE_DIR / "data" / "backups"
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
@@ -134,32 +137,60 @@ def db():
     conn.row_factory = sqlite3.Row
     return conn
 
+def login_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if "user" not in session:
+            return redirect(url_for("login"))
+        return fn(*args, **kwargs)
+    return wrapper
+
+
+def admin_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        user = session.get("user")
+        if not user or user.get("role") != "admin":
+            return redirect(url_for("dashboard"))
+        return fn(*args, **kwargs)
+    return wrapper
 
 def init_db():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = db()
     cur = conn.cursor()
 
-    cur.executescript(
-        """
-        CREATE TABLE IF NOT EXISTS module_state (
-            team_id TEXT NOT NULL,
-            module_id TEXT NOT NULL,
-            enabled INTEGER NOT NULL DEFAULT 0,
-            PRIMARY KEY (team_id, module_id)
-        );
+    cur.executescript("""
+    CREATE TABLE IF NOT EXISTS module_state (
+        team_id TEXT NOT NULL,
+        module_id TEXT NOT NULL,
+        enabled INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (team_id, module_id)
+    );
 
-        CREATE TABLE IF NOT EXISTS submissions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            team_id TEXT NOT NULL,
-            module_id TEXT NOT NULL,
-            challenge_id TEXT NOT NULL,
-            submitted_flag TEXT NOT NULL,
-            is_correct INTEGER NOT NULL DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """
-    )
+    CREATE TABLE IF NOT EXISTS submissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        team_id TEXT NOT NULL,
+        module_id TEXT NOT NULL,
+        challenge_id TEXT NOT NULL,
+        submitted_flag TEXT NOT NULL,
+        is_correct INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS team_integrity (
+        team_id TEXT PRIMARY KEY,
+        integrity REAL NOT NULL DEFAULT 100
+    );
+
+    CREATE TABLE IF NOT EXISTS module_penalties (
+        team_id TEXT NOT NULL,
+        module_id TEXT NOT NULL,
+        missed_challenges INTEGER NOT NULL DEFAULT 0,
+        penalty_percent REAL NOT NULL DEFAULT 0,
+        PRIMARY KEY (team_id, module_id)
+    );
+    """)
 
     for team in TEAMS:
         for module in MODULES:
@@ -170,6 +201,14 @@ def init_db():
                 """,
                 (team["id"], module["id"], 1 if module["id"] == "m1" else 0),
             )
+            
+            cur.execute(
+            """
+            INSERT OR IGNORE INTO team_integrity(team_id, integrity)
+            VALUES (?, 100)
+            """,
+            (team["id"],),
+        )
 
     conn.commit()
     conn.close()
@@ -187,6 +226,70 @@ def safe_challenge_id(name, folder_name):
     while "--" in slug:
         slug = slug.replace("--", "-")
     return slug or folder_name.lower() or "challenge"
+
+
+def reset_db_state():
+    conn = db()
+    cur = conn.cursor()
+
+    cur.execute("DELETE FROM submissions")
+    cur.execute("DELETE FROM module_penalties")
+    cur.execute("DELETE FROM team_integrity")
+    cur.execute("DELETE FROM module_state")
+
+    for team in TEAMS:
+        cur.execute(
+            """
+            INSERT OR REPLACE INTO team_integrity(team_id, integrity)
+            VALUES (?, 100)
+            """,
+            (team["id"],),
+        )
+
+        for module in MODULES:
+            cur.execute(
+                """
+                INSERT OR REPLACE INTO module_state(team_id, module_id, enabled)
+                VALUES (?, ?, ?)
+                """,
+                (team["id"], module["id"], 1 if module["id"] == "m1" else 0),
+            )
+
+    conn.commit()
+    conn.close()
+
+
+
+@app.route("/admin/db-dump", methods=["POST"])
+@login_required
+@admin_required
+def admin_db_dump():
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+    dump_path = BACKUP_DIR / f"app-db-backup-{timestamp}.sqlite3"
+
+    if not DB_PATH.exists():
+        flash("Database non trovato.", "error")
+        return redirect(url_for("dashboard"))
+
+    shutil.copy2(DB_PATH, dump_path)
+
+    return send_file(
+        dump_path,
+        as_attachment=True,
+        download_name=dump_path.name,
+        mimetype="application/octet-stream",
+    )
+    
+
+@app.route("/admin/db-reset", methods=["POST"])
+@login_required
+@admin_required
+def admin_db_reset():
+    reset_db_state()
+    flash("Database resettato correttamente.", "ok")
+    return redirect(url_for("dashboard"))
 
 
 def load_red_vs_blue_challenges():
@@ -228,7 +331,7 @@ def load_red_vs_blue_challenges():
     return challenges
 
 
-def get_modules():
+def get_modules(): 
     modules = []
 
     for module in MODULES:
@@ -300,23 +403,7 @@ def find_challenge(modules, module_id, challenge_id):
     return module, challenge
 
 
-def login_required(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        if "user" not in session:
-            return redirect(url_for("login"))
-        return fn(*args, **kwargs)
-    return wrapper
 
-
-def admin_required(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        user = session.get("user")
-        if not user or user.get("role") != "admin":
-            return redirect(url_for("dashboard"))
-        return fn(*args, **kwargs)
-    return wrapper
 
 
 def get_user(username, password):
@@ -346,12 +433,119 @@ def submissions_for(team_id):
     return rows
 
 
-def build_damage_state(enabled_modules, solved_modules):
-    enabled_ids = {module_id for module_id, is_enabled in enabled_modules.items() if is_enabled}
-    pending = max(0, len(enabled_ids - solved_modules))
-    damaged = SHIP_COMPONENT_ORDER[:pending]
-    integrity = max(0, 100 - pending * 25)
-    return damaged, integrity
+def total_campaign_challenges(modules):
+    return sum(len(module.get("challenges", [])) for module in modules)
+
+def solved_challenge_ids_for_module(team_id, module_id):
+    conn = db()
+    rows = conn.execute(
+        """
+        SELECT DISTINCT challenge_id
+        FROM submissions
+        WHERE team_id = ? AND module_id = ? AND is_correct = 1
+        """,
+        (team_id, module_id),
+    ).fetchall()
+    conn.close()
+    return {row["challenge_id"] for row in rows}
+
+def get_team_integrity(team_id):
+    conn = db()
+    row = conn.execute(
+        "SELECT integrity FROM team_integrity WHERE team_id = ?",
+        (team_id,),
+    ).fetchone()
+    conn.close()
+    return float(row["integrity"]) if row else 100.0
+
+def get_module_penalties_for_team(team_id):
+    conn = db()
+    rows = conn.execute(
+        """
+        SELECT module_id, missed_challenges, penalty_percent
+        FROM module_penalties
+        WHERE team_id = ?
+        """,
+        (team_id,),
+    ).fetchall()
+    conn.close()
+    return {
+        row["module_id"]: {
+            "missed_challenges": row["missed_challenges"],
+            "penalty_percent": row["penalty_percent"],
+        }
+        for row in rows
+    }
+
+def apply_module_penalty(team_id, module_id):
+    modules = get_modules()
+    module = find_module(modules, module_id)
+    if not module:
+        return
+
+    conn = db()
+
+    already_penalized = conn.execute(
+        """
+        SELECT 1
+        FROM module_penalties
+        WHERE team_id = ? AND module_id = ?
+        """,
+        (team_id, module_id),
+    ).fetchone()
+
+    if already_penalized:
+        conn.close()
+        return
+
+    total_in_module = len(module.get("challenges", []))
+    solved_ids = solved_challenge_ids_for_module(team_id, module_id)
+    missed = max(0, total_in_module - len(solved_ids))
+
+    total_campaign = total_campaign_challenges(modules) or 1
+    penalty = (missed / total_campaign) * 100
+
+    current_row = conn.execute(
+        "SELECT integrity FROM team_integrity WHERE team_id = ?",
+        (team_id,),
+    ).fetchone()
+    current_integrity = float(current_row["integrity"]) if current_row else 100.0
+    new_integrity = max(0.0, current_integrity - penalty)
+
+    conn.execute(
+        """
+        INSERT OR REPLACE INTO module_penalties(team_id, module_id, missed_challenges, penalty_percent)
+        VALUES (?, ?, ?, ?)
+        """,
+        (team_id, module_id, missed, penalty),
+    )
+
+    conn.execute(
+        """
+        INSERT OR REPLACE INTO team_integrity(team_id, integrity)
+        VALUES (?, ?)
+        """,
+        (team_id, new_integrity),
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def build_damage_state(integrity):
+    if integrity >= 100:
+        damaged_count = 0
+    elif integrity >= 75:
+        damaged_count = 1
+    elif integrity >= 50:
+        damaged_count = 2
+    elif integrity >= 25:
+        damaged_count = 3
+    else:
+        damaged_count = 4
+
+    damaged = SHIP_COMPONENT_ORDER[:damaged_count]
+    return damaged, round(max(0.0, integrity), 1)
 
 
 def build_team_view(team):
@@ -371,14 +565,36 @@ def build_team_view(team):
 
     solved_pairs = {(row["module_id"], row["challenge_id"]) for row in solved_rows}
     solved_modules = {row["module_id"] for row in solved_rows}
+    penalties = get_module_penalties_for_team(team["id"])
 
     score = 0
+    module_progress = []
+
     for module in modules:
+        solved_in_module = 0
+        total_in_module = len(module.get("challenges", []))
+
         for challenge in module.get("challenges", []):
             if (module["id"], challenge["id"]) in solved_pairs:
                 score += int(challenge.get("points", module.get("points", 0)) or 0)
+                solved_in_module += 1
 
-    damaged, integrity = build_damage_state(enabled, solved_modules)
+        penalty_info = penalties.get(module["id"], {"missed_challenges": 0, "penalty_percent": 0})
+
+        module_progress.append({
+            "id": module["id"],
+            "title": module["title"],
+            "challenge_title": module.get("challenge_title"),
+            "enabled": enabled.get(module["id"], False),
+            "solved_count": solved_in_module,
+            "total_count": total_in_module,
+            "closed": module["id"] in penalties,
+            "missed_challenges": penalty_info["missed_challenges"],
+            "penalty_percent": round(penalty_info["penalty_percent"], 1),
+        })
+
+    integrity_value = get_team_integrity(team["id"])
+    damaged, integrity = build_damage_state(integrity_value)
 
     return {
         **team,
@@ -389,6 +605,8 @@ def build_team_view(team):
         "solved_count": len(solved_pairs),
         "integrity": integrity,
         "damaged": damaged,
+        "module_progress": module_progress,
+        "integrity_losses": penalties,
     }
 
 
@@ -468,6 +686,15 @@ def module_toggle():
     enabled = 1 if request.form.get("enabled") == "1" else 0
 
     conn = db()
+    previous = conn.execute(
+        """
+        SELECT enabled
+        FROM module_state
+        WHERE team_id = ? AND module_id = ?
+        """,
+        (team_id, module_id),
+    ).fetchone()
+
     conn.execute(
         """
         UPDATE module_state
@@ -478,6 +705,10 @@ def module_toggle():
     )
     conn.commit()
     conn.close()
+
+    was_enabled = bool(previous["enabled"]) if previous else False
+    if was_enabled and not enabled:
+        apply_module_penalty(team_id, module_id)
 
     flash("Stato modulo aggiornato.", "ok")
     return redirect(url_for("dashboard"))

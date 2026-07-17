@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Admin Dashboard{% endblock %}
 
-{% block content %}
+{% block page_header %}
 <section class="team-scoreboard">
   <div class="scoreboard-head">
     <div>
@@ -10,69 +10,112 @@
       <p>Controlla lo stato delle navi, l'avanzamento dei team e l'abilitazione dei moduli operativi.</p>
     </div>
   </div>
+</section>
+{% endblock %}
 
-  <div class="team-grid">
-    {% for team in teams %}
-    <article class="ship-card admin-team-card {% if loop.index == 1 %}leader{% endif %}" style="--accent: {{ team.accent }};">
-      <div class="ship-header">
-        <div>
-          <h2 class="team-name">{{ team.name }}</h2>
-          <div class="team-code">{{ team.code }}</div>
-        </div>
-        <div class="rank">{{ team.solved_count }}</div>
-      </div>
-
-      <div class="score-row">
-        <div class="score">{{ team.score }}</div>
-        <div class="score-label">
-          punti<br>
-          integrità {{ team.integrity }}%
-        </div>
-      </div>
-
-      <div class="ship-wrap
-        {% if 'radar' in team.damaged %} damage-radar{% endif %}
-        {% if 'sails' in team.damaged %} damage-sails{% endif %}
-        {% if 'compass' in team.damaged %} damage-compass{% endif %}
-        {% if 'rudder' in team.damaged %} damage-rudder{% endif %}
-      ">
-        <div class="sea"></div>
-
-        <div class="ship">
-          <div class="hull"></div>
-          <div class="deck"></div>
-          <div class="bridge"></div>
-          <div class="mast"></div>
-          <div class="sail sail-main"></div>
-          <div class="sail sail-front"></div>
-          <div class="radar"></div>
-          <div class="compass"></div>
-          <div class="rudder"></div>
-
-          <div class="component {% if 'radar' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="radar">RD</div>
-          <div class="component {% if 'sails' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="sails">CM</div>
-          <div class="component {% if 'compass' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="compass">BS</div>
-          <div class="component {% if 'rudder' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="rudder">TM</div>
-
-          <div class="smoke s1"></div>
-          <div class="smoke s2"></div>
-        </div>
-      </div>
-
-      <div class="integrity">
-        <div class="integrity-head">
-          <span>Integrità assetto</span>
-          <span>{{ team.integrity }}%</span>
-        </div>
-        <div class="bar">
-          <span style="--value: {{ team.integrity }}%;"></span>
-        </div>
-      </div>
-
-      <a class="ship-detail-link" href="{{ url_for('inspect_team', team_id=team.id) }}">Ispeziona team</a>
-    </article>
-    {% endfor %}
+{% block content %}
+<section class="panel admin-tools-panel">
+  <div class="panel-heading">
+    <h3>Strumenti amministrativi</h3>
+    <p>Operazioni riservate all’amministrazione per backup e ripristino dello stato esercitativo.</p>
   </div>
+
+  <div class="admin-tools-row">
+    <form method="post" action="{{ url_for('admin_db_dump') }}">
+      <button type="submit">Scarica dump DB</button>
+    </form>
+
+    <form method="post" action="{{ url_for('admin_db_reset') }}" onsubmit="return confirm('Confermi il reset completo del database?');">
+      <button type="submit" class="danger-button">Reset DB</button>
+    </form>
+  </div>
+</section>
+
+<section class="team-grid">
+  {% for team in teams %}
+  <article class="ship-card admin-team-card {% if loop.index == 1 %}leader{% endif %}" style="--accent: {{ team.accent }};">
+    <div class="ship-header">
+      <div>
+        <h2 class="team-name">{{ team.name }}</h2>
+        <div class="team-code">{{ team.code }}</div>
+      </div>
+      <div class="rank">{{ team.solved_count }}</div>
+    </div>
+
+    <div class="score-row">
+      <div class="score">{{ team.score }}</div>
+      <div class="score-label">
+        punti<br>
+        integrità {{ team.integrity }}%
+      </div>
+    </div>
+
+    <div class="ship-wrap
+      {% if 'radar' in team.damaged %} damage-radar{% endif %}
+      {% if 'sails' in team.damaged %} damage-sails{% endif %}
+      {% if 'compass' in team.damaged %} damage-compass{% endif %}
+      {% if 'rudder' in team.damaged %} damage-rudder{% endif %}
+    ">
+      <div class="sea"></div>
+
+      <div class="ship">
+        <div class="hull"></div>
+        <div class="deck"></div>
+        <div class="bridge"></div>
+        <div class="mast"></div>
+        <div class="sail sail-main"></div>
+        <div class="sail sail-front"></div>
+        <div class="radar"></div>
+        <div class="compass"></div>
+        <div class="rudder"></div>
+
+        <div class="component {% if 'radar' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="radar">RD</div>
+        <div class="component {% if 'sails' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="sails">CM</div>
+        <div class="component {% if 'compass' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="compass">BS</div>
+        <div class="component {% if 'rudder' in team.damaged %}damaged{% else %}ok{% endif %}" data-component="rudder">TM</div>
+
+        <div class="smoke s1"></div>
+        <div class="smoke s2"></div>
+      </div>
+    </div>
+
+    <div class="integrity">
+      <div class="integrity-head">
+        <span>Integrità assetto</span>
+        <span>{{ team.integrity }}%</span>
+      </div>
+      <div class="bar">
+        <span style="--value: {{ team.integrity }}%;"></span>
+      </div>
+    </div>
+
+    <div class="tasks admin-summary">
+      <strong>Stato generale</strong>
+      <span>Challenge completate: {{ team.solved_count }}</span>
+      <span>Moduli attivi: {{ team.enabled_modules.values()|select|list|length }}</span>
+      <span>Moduli risolti: {{ team.solved_modules|length }}</span>
+    </div>
+
+    {% set losses = team.module_progress | selectattr('closed') | list %}
+    {% if losses %}
+    <div class="team-losses">
+      <strong>Penalità consolidate</strong>
+      <ul>
+        {% for item in losses %}
+        <li>{{ item.title }}: {{ item.missed_challenges }} mancanti, -{{ item.penalty_percent }}%</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% else %}
+    <div class="team-losses">
+      <strong>Penalità consolidate</strong>
+      <p>Nessuna penalità registrata.</p>
+    </div>
+    {% endif %}
+
+    <a class="ship-detail-link" href="{{ url_for('inspect_team', team_id=team.id) }}">Ispeziona team</a>
+  </article>
+  {% endfor %}
 </section>
 
 <section class="module">
@@ -96,6 +139,7 @@
 
       <div class="admin-toggle-grid">
         {% for team in teams %}
+        {% set team_module = (team.module_progress | selectattr('id', 'equalto', module.id) | list | first) %}
         <form class="admin-toggle-card" method="post" action="{{ url_for('module_toggle') }}">
           <input type="hidden" name="team_id" value="{{ team.id }}">
           <input type="hidden" name="module_id" value="{{ module.id }}">
@@ -105,6 +149,16 @@
             <span class="{% if team.enabled_modules.get(module.id, false) %}is-on{% else %}is-off{% endif %}">
               {% if team.enabled_modules.get(module.id, false) %}ON{% else %}OFF{% endif %}
             </span>
+          </div>
+
+          <div class="tasks">
+            <span>Challenge: {{ team_module.solved_count if team_module else 0 }}/{{ team_module.total_count if team_module else 0 }}</span>
+            {% if team_module and team_module.closed %}
+            <span>Penalità: -{{ team_module.penalty_percent }}%</span>
+            <span>Mancanti: {{ team_module.missed_challenges }}</span>
+            {% else %}
+            <span>Penalità: non consolidata</span>
+            {% endif %}
           </div>
 
           <label class="switch-row">
