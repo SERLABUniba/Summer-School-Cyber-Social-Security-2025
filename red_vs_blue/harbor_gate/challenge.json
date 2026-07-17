@@ -1,6 +1,5 @@
 {
     "name":"Harbor Gate",
-    "autors":"Davide Pio Posa",
     "description":"Pannello di accesso al sistema di comando navale simulato. Il controllo credenziali sembra solido, ma forse meno solido sullo stato.maggiore...",
     "url":"http://www-thehackspace.hosting.uniba.it/red_vs_blue/harbor_gate/",
     "flag":"SSCSS{accesso_riservato_stato_maggiore}"

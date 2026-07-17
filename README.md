@@ -21,3 +21,18 @@ Four Challenges:
 | Trident Check 2  | Blind Command Injection   | 
 
 ## Related Academic Work
+```
+@article{caivano2025red,
+  title={Red Team Knife to improve Cyber Security Education},
+  author={Caivano, Danilo and Gentile, Adriano and Del Campo, Gennaro and Posa, Davide Pio and Piccinno, Antonio},
+  year={2025}
+}
+
+@inproceedings{barletta2025cyber,
+  title={Cyber Digital Twin to improve Security Education: the RedTeam Knife approach},
+  author={Barletta, Vita Santa and Caivano, Danilo and Catalano, Christian and Gentile, Adriano and Posa, Davide Pio and Piccinno, Antonio},
+  booktitle={Proceedings of the 16th Biannual Conference of the Italian SIGCHI Chapter},
+  pages={1--7},
+  year={2025}
+}
+```
