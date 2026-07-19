@@ -1,0 +1,22 @@
+[
+    {
+        "name": "CSS-CTI Riconoscimento Profilo: Nome Utente",
+        "description": "Individuazione online di un soggetto attraverso analisi di dati",
+        "flag": "SSCSS{sakurasnowangelaiko}"
+    },
+    {
+        "name": "CSS-CTI Riconoscimento Profilo: Indirizzo mail",
+        "description": "Individuazione online di un soggetto attraverso analisi di dati",
+        "flag": "SSCSS{SakuraSnowAngel83@protonmail.com}"
+    },
+    {
+        "name": "CSS-CTI Riconoscimento Profilo: Aeroporto",
+        "description": "Individuazione online di un soggetto attraverso analisi di dati",
+        "flag": "SSCSS{RonaldReaganWashingtonNationalAirport}"
+    },
+    {
+        "name": "CSS-CTI Riconoscimento Profilo: Aeroporto",
+        "description": "Individuazione online di un soggetto attraverso analisi di dati",
+        "flag": "SSCSS{Inawashiro}"
+    }
+]

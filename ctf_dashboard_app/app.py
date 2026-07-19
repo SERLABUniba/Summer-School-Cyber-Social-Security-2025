@@ -11,6 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "app.db"
 RED_VS_BLUE_DIR = Path("/opt/red_vs_blue")
 CSS_MDO_FILE = Path("/opt/css_mdo/css_mdo.json")
+CTI_FILE = Path("/opt/cti/CTI.json")
 BACKUP_DIR = BASE_DIR / "data" / "backups"
 
 app = Flask(__name__)
@@ -368,7 +369,7 @@ def load_red_vs_blue_challenges():
     return challenges
 
 
-def get_modules(): 
+def get_modules():
     modules = []
 
     for module in MODULES:
@@ -377,16 +378,34 @@ def get_modules():
 
         if item["id"] == "m1":
             dynamic_challenges = load_css_mdo_challenges()
+
             if dynamic_challenges:
                 item["challenges"] = dynamic_challenges
                 item["challenge_title"] = "Cyber-Social Security MDO Dynamic Pack"
-                item["points"] = sum(ch.get("points", 0) for ch in dynamic_challenges) or item.get("points", 0)
+                item["points"] = (
+                    sum(ch.get("points", 0) for ch in dynamic_challenges)
+                    or item.get("points", 0)
+                )
+
+        if item["id"] == "m2":
+            dynamic_challenges = load_cti_challenges()
+
+            if dynamic_challenges:
+                item["challenges"] = dynamic_challenges
+                item["challenge_title"] = "Cyber Threat Intelligence Dynamic Pack"
+                item["points"] = (
+                    sum(ch.get("points", 0) for ch in dynamic_challenges)
+                    or item.get("points", 0)
+                )
 
         if item["id"] == "m3":
             dynamic_challenges = load_red_vs_blue_challenges()
             item["challenges"] = dynamic_challenges
             item["challenge_title"] = "Red Team vs Blue Team Dynamic Pack"
-            item["points"] = sum(ch.get("points", 0) for ch in dynamic_challenges) or item.get("points", 0)
+            item["points"] = (
+                sum(ch.get("points", 0) for ch in dynamic_challenges)
+                or item.get("points", 0)
+            )
 
         modules.append(item)
 
@@ -422,6 +441,41 @@ def load_css_mdo_challenges():
             "expected_flag": (item.get("flag") or "").strip(),
             "type": "MDO",
             "points": 100
+        })
+
+    return challenges
+
+
+def load_cti_challenges():
+    challenges = []
+
+    if not CTI_FILE.exists() or not CTI_FILE.is_file():
+        return challenges
+
+    try:
+        raw_items = json.loads(CTI_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return challenges
+
+    if not isinstance(raw_items, list):
+        return challenges
+
+    for idx, item in enumerate(raw_items, start=1):
+        if not isinstance(item, dict):
+            continue
+
+        name = (item.get("name") or f"CTI Challenge {idx}").strip()
+
+        challenges.append({
+            # L'indice evita collisioni quando due challenge hanno lo stesso nome.
+            "id": f"m2-{idx}-{safe_challenge_id(name, str(idx))}",
+            "title": name,
+            "authors": item.get("authors", item.get("autors", "")),
+            "description": item.get("description", ""),
+            "url": item.get("url", ""),
+            "expected_flag": (item.get("flag") or "").strip(),
+            "type": "CTI",
+            "points": int(item.get("points", 120) or 120),
         })
 
     return challenges

@@ -10,6 +10,7 @@ services:
       - ./data:/app/data
       - ../red_vs_blue:/opt/red_vs_blue
       - ../css_mdo:/opt/css_mdo
+      - ../cti:/opt/cti
     command:
       - sh
       - -c
