@@ -9,9 +9,16 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "data" / "app.db"
+
+
 RED_VS_BLUE_DIR = Path("/opt/red_vs_blue")
 CSS_MDO_FILE = Path("/opt/css_mdo/css_mdo.json")
 CTI_FILE = Path("/opt/cti/CTI.json")
+HYBRID_FILE = Path("/opt/CTF-Base_Hybrid-Malaware/hybrid.json")
+MALWARE_FILE = Path("/opt/CTF-Base_Hybrid-Malaware/malware.json")
+
+
+
 BACKUP_DIR = BASE_DIR / "data" / "backups"
 
 app = Flask(__name__)
@@ -111,7 +118,7 @@ MODULES = [
         "mission": "Analizzare una workstation di bordo compromessa e identificare C2, persistence e payload.",
         "type": "REV",
         "challenge_title": "Reverse Completed",
-        "points": 140,
+        "points": 120,
         "challenges": [
             {"id": "m4-c1", "title": "Reverse Completed", "expected_flag": "FLAG{MALWARE_REV}", "points": 140},
         ],
@@ -133,7 +140,7 @@ MODULES = [
         "mission": "Correlare cyber, droni, propaganda, sabotaggio e social engineering in una campagna ibrida.",
         "type": "HYB",
         "challenge_title": "Hybrid Campaign Reconstruction",
-        "points": 140,
+        "points": 120,
         "challenges": [
             {"id": "m6-c1", "title": "Hybrid Campaign Reconstruction", "expected_flag": "FLAG{HYBRID_RECON}", "points": 140},
         ],
@@ -400,12 +407,46 @@ def get_modules():
 
         if item["id"] == "m3":
             dynamic_challenges = load_red_vs_blue_challenges()
-            item["challenges"] = dynamic_challenges
-            item["challenge_title"] = "Red Team vs Blue Team Dynamic Pack"
-            item["points"] = (
-                sum(ch.get("points", 0) for ch in dynamic_challenges)
-                or item.get("points", 0)
+
+            if dynamic_challenges:
+                item["challenges"] = dynamic_challenges
+                item["challenge_title"] = "Red Team vs Blue Team Dynamic Pack"
+                item["points"] = (
+                    sum(ch.get("points", 0) for ch in dynamic_challenges)
+                    or item.get("points", 0)
+                )
+
+        if item["id"] == "m4":
+            dynamic_challenges = load_json_challenges(
+                MALWARE_FILE,
+                module_id="m4",
+                challenge_type="MALWARE",
+                default_points=120,
             )
+
+            if dynamic_challenges:
+                item["challenges"] = dynamic_challenges
+                item["challenge_title"] = "Malware Analysis Dynamic Pack"
+                item["points"] = (
+                    sum(ch.get("points", 0) for ch in dynamic_challenges)
+                    or item.get("points", 0)
+                )
+
+        if item["id"] == "m6":
+            dynamic_challenges = load_json_challenges(
+                HYBRID_FILE,
+                module_id="m6",
+                challenge_type="HYBRID",
+                default_points=120,
+            )
+
+            if dynamic_challenges:
+                item["challenges"] = dynamic_challenges
+                item["challenge_title"] = "Hybrid Warfare Dynamic Pack"
+                item["points"] = (
+                    sum(ch.get("points", 0) for ch in dynamic_challenges)
+                    or item.get("points", 0)
+                )
 
         modules.append(item)
 
@@ -476,6 +517,39 @@ def load_cti_challenges():
             "expected_flag": (item.get("flag") or "").strip(),
             "type": "CTI",
             "points": int(item.get("points", 120) or 120),
+        })
+
+    return challenges
+
+def load_json_challenges(json_file, module_id, challenge_type, default_points):
+    challenges = []
+
+    if not json_file.exists() or not json_file.is_file():
+        return challenges
+
+    try:
+        raw_items = json.loads(json_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return challenges
+
+    if not isinstance(raw_items, list):
+        return challenges
+
+    for idx, item in enumerate(raw_items, start=1):
+        if not isinstance(item, dict):
+            continue
+
+        name = (item.get("name") or f"{challenge_type} Challenge {idx}").strip()
+
+        challenges.append({
+            "id": f"{module_id}-{idx}-{safe_challenge_id(name, str(idx))}",
+            "title": name,
+            "authors": item.get("authors", item.get("autors", "")),
+            "description": item.get("description", ""),
+            "url": item.get("url", ""),
+            "expected_flag": (item.get("flag") or "").strip(),
+            "type": challenge_type,
+            "points": int(item.get("points", default_points) or default_points),
         })
 
     return challenges

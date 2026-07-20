@@ -11,6 +11,7 @@ services:
       - ../red_vs_blue:/opt/red_vs_blue
       - ../css_mdo:/opt/css_mdo
       - ../cti:/opt/cti
+      - ../CTF-Base_Hybrid-Malaware:/opt/CTF-Base_Hybrid-Malaware
     command:
       - sh
       - -c

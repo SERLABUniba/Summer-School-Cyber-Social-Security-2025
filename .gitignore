@@ -141,3 +141,6 @@ cython_debug/
 # OS files
 .DS_Store
 Thumbs.db
+
+
+CTF-Base_Hybrid-Malaware/
