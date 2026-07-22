@@ -12,6 +12,7 @@ services:
       - ../css_mdo:/opt/css_mdo
       - ../cti:/opt/cti
       - ../CTF-Base_Hybrid-Malaware:/opt/CTF-Base_Hybrid-Malaware
+      - ../AI_CSS:/opt/AI_CSS
     command:
       - sh
       - -c

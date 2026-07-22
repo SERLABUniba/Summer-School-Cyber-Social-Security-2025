@@ -16,6 +16,7 @@ CSS_MDO_FILE = Path("/opt/css_mdo/css_mdo.json")
 CTI_FILE = Path("/opt/cti/CTI.json")
 HYBRID_FILE = Path("/opt/CTF-Base_Hybrid-Malaware/hybrid.json")
 MALWARE_FILE = Path("/opt/CTF-Base_Hybrid-Malaware/malware.json")
+AI_GEN_FILE = Path("/opt/AI_CSS/ai_css.json")
 
 
 
@@ -151,7 +152,7 @@ MODULES = [
         "mission": "Rilevare deepfake, immagini false, audio sintetico e phishing generato da LLM recuperando fiducia nelle fonti.",
         "type": "AI",
         "challenge_title": "Trust Recovery",
-        "points": 130,
+        "points": 120,
         "challenges": [
             {"id": "m7-c1", "title": "Trust Recovery", "expected_flag": "FLAG{AI_TRUST}", "points": 130},
         ],
@@ -443,6 +444,21 @@ def get_modules():
             if dynamic_challenges:
                 item["challenges"] = dynamic_challenges
                 item["challenge_title"] = "Hybrid Warfare Dynamic Pack"
+                item["points"] = (
+                    sum(ch.get("points", 0) for ch in dynamic_challenges)
+                    or item.get("points", 0)
+                )
+        
+        if item["id"] == "m7":
+            dynamic_challenges = load_json_challenges(
+                AI_GEN_FILE,
+                module_id="m7",
+                challenge_type="AI",
+                default_points=120,
+            )
+            if dynamic_challenges:
+                item["challenges"] = dynamic_challenges
+                item["challenge_title"] = "AI Generativa Dynamic Pack"
                 item["points"] = (
                     sum(ch.get("points", 0) for ch in dynamic_challenges)
                     or item.get("points", 0)

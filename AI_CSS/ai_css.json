@@ -1,0 +1,42 @@
+[
+    {
+        "name": "Identifica la password: Livello 1",
+        "description": "Inserisci la Password",
+        "flag": "SSCSS{COCOLOCO}"
+    },
+    {
+        "name": "Identifica la password: Livello 2",
+        "description": "Inserisci la Password",
+        "flag": "SSCSS{POTENTIAL}"
+    },
+    {
+        "name": "Identifica la password: Livello 3",
+        "description": "Inserisci la Password",
+        "flag": "SSCSS{WAVELENGTH}"
+    },
+    {
+        "name": "Identifica la password: Livello 4",
+        "description": "Inserisci la Password",
+        "flag": "SSCSS{UNDERGROUND}"
+    },
+    {
+        "name": "Identifica la password: Livello 5",
+        "description": "Inserisci la Password",
+        "flag": "SSCSS{BESTOWED}"
+    },
+    {
+        "name": "Identifica la password: Livello 6",
+        "description": "Inserisci la Password",
+        "flag": "SSCSS{UNDERPASS}"
+    },
+    {
+        "name": "Identifica la password: Livello 7",
+        "description": "Inserisci la Password",
+        "flag": "SSCSS{DEBUTANTE}"
+    },
+    {
+        "name": "Identifica la password: Livello 8",
+        "description": "Inserisci la Password",
+        "flag": "SSCSS{OCTOPODES}"
+    }
+]
