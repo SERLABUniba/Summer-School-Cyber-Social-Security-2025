@@ -714,7 +714,7 @@ def apply_module_penalty(team_id, module_id):
 
 
 def build_damage_state(integrity):
-    if integrity >= 100:
+    if integrity >= 90:
         damaged_count = 0
     elif integrity >= 75:
         damaged_count = 1
@@ -725,7 +725,18 @@ def build_damage_state(integrity):
     else:
         damaged_count = 4
 
-    damaged = SHIP_COMPONENT_ORDER[:damaged_count]
+    damage_keys = {
+        "Radar": "radar",
+        "Comunicazioni": "sails",
+        "Bussola": "compass",
+        "Timone": "rudder",
+    }
+
+    damaged = [
+        damage_keys[component]
+        for component in SHIP_COMPONENT_ORDER[:damaged_count]
+    ]
+
     return damaged, round(max(0.0, integrity), 1)
 
 
