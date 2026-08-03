@@ -51,28 +51,28 @@ USERS = [
     },
     {
         "username": "nave_cavour",
-        "password": "gianluigi_reversi",
+        "password": "gabriel_voltammare",
         "role": "team",
         "team_id": "cavour",
         "display_name": "Unità Cavour"
     },
     {
         "username": "nave_garibaldi",
-        "password": "carlo_alfonso_barone",
+        "password": "davide_posavec",
         "role": "team",
         "team_id": "garibaldi",
         "display_name": "Unità Garibaldi"
     },
     {
         "username": "nave_trieste",
-        "password": "francesco_marzi",
+        "password": "rebecca_marinaro",
         "role": "team",
         "team_id": "trieste",
         "display_name": "Unità Trieste"
     },
     {
         "username": "nave_vespucci",
-        "password": "augusto_radicati",
+        "password": "samuele_vascellovo",
         "role": "team",
         "team_id": "vespucci",
         "display_name": "Unità Vespucci"
