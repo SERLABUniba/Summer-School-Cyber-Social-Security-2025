@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, send_file
+from werkzeug.middleware.proxy_fix import ProxyFix
 from datetime import datetime
 import shutil
 import sqlite3
@@ -23,6 +24,14 @@ AI_GEN_FILE = Path("/opt/AI_CSS/ai_css.json")
 BACKUP_DIR = BASE_DIR / "data" / "backups"
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,
+    x_proto=1,
+    x_host=1,
+    x_prefix=1
+)
+
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-me-in-production")
 
 TEAMS = [
@@ -661,22 +670,8 @@ def get_module_penalties_for_team(team_id):
 def apply_module_penalty(team_id, module_id):
     modules = get_modules()
     module = find_module(modules, module_id)
+
     if not module:
-        return
-
-    conn = db()
-
-    already_penalized = conn.execute(
-        """
-        SELECT 1
-        FROM module_penalties
-        WHERE team_id = ? AND module_id = ?
-        """,
-        (team_id, module_id),
-    ).fetchone()
-
-    if already_penalized:
-        conn.close()
         return
 
     total_in_module = len(module.get("challenges", []))
@@ -684,34 +679,77 @@ def apply_module_penalty(team_id, module_id):
     missed = max(0, total_in_module - len(solved_ids))
 
     total_campaign = total_campaign_challenges(modules) or 1
-    penalty = (missed / total_campaign) * 100
+    new_penalty = (missed / total_campaign) * 100
+
+    conn = db()
+
+    previous_penalty_row = conn.execute(
+        """
+        SELECT penalty_percent
+        FROM module_penalties
+        WHERE team_id = ? AND module_id = ?
+        """,
+        (team_id, module_id),
+    ).fetchone()
+
+    previous_penalty = (
+        float(previous_penalty_row["penalty_percent"])
+        if previous_penalty_row
+        else 0.0
+    )
+
+    # Positivo: nuova penalità maggiore, quindi l'integrità diminuisce.
+    # Negativo: il team ha risolto challenge, quindi l'integrità recupera.
+    penalty_delta = new_penalty - previous_penalty
 
     current_row = conn.execute(
-        "SELECT integrity FROM team_integrity WHERE team_id = ?",
+        """
+        SELECT integrity
+        FROM team_integrity
+        WHERE team_id = ?
+        """,
         (team_id,),
     ).fetchone()
-    current_integrity = float(current_row["integrity"]) if current_row else 100.0
-    new_integrity = max(0.0, current_integrity - penalty)
 
-    conn.execute(
-        """
-        INSERT OR REPLACE INTO module_penalties(team_id, module_id, missed_challenges, penalty_percent)
-        VALUES (?, ?, ?, ?)
-        """,
-        (team_id, module_id, missed, penalty),
+    current_integrity = (
+        float(current_row["integrity"])
+        if current_row
+        else 100.0
+    )
+
+    new_integrity = min(
+        100.0,
+        max(0.0, current_integrity - penalty_delta),
     )
 
     conn.execute(
         """
-        INSERT OR REPLACE INTO team_integrity(team_id, integrity)
+        INSERT INTO module_penalties (
+            team_id,
+            module_id,
+            missed_challenges,
+            penalty_percent
+        )
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(team_id, module_id) DO UPDATE SET
+            missed_challenges = excluded.missed_challenges,
+            penalty_percent = excluded.penalty_percent
+        """,
+        (team_id, module_id, missed, new_penalty),
+    )
+
+    conn.execute(
+        """
+        INSERT INTO team_integrity(team_id, integrity)
         VALUES (?, ?)
+        ON CONFLICT(team_id) DO UPDATE SET
+            integrity = excluded.integrity
         """,
         (team_id, new_integrity),
     )
 
     conn.commit()
     conn.close()
-
 
 def build_damage_state(integrity):
     if integrity >= 90:
