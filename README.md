@@ -2,6 +2,10 @@
 
 Repository containing the educational material and CTF platform for the Cyber-Social Security Summer School. The project includes a **game dashboard** with team authentication, module management, flag validation, scoring, and a scoreboard.
 
+## Authors and references
+
+_Vita Santa Barletta, Danilo Caivano, Gabriel Cellammare, Samuele Del Vescovo, Rebecca Margiotta, and Davide Pio Posa._
+
 ## Repository contents
 
 The activities are organized into the following modules:
@@ -126,10 +130,6 @@ Before a public deployment:
 - restrict administrative access and access to solution material.
 
 These activities are for educational purposes only and must be run only on authorized systems and networks.
-
-## Authors and references
-
-_Vita Santa Barletta, Danilo Caivano, Gabriel Cellammare, Samuele Del Vescovo, Rebecca Margiotta, and Davide Pio Posa._
 
 ### Related Academic Work
 
